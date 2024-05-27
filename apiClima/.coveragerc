@@ -1,0 +1,6 @@
+[run]
+source = apiClima
+omit = 
+    tests/*
+    autoapp.py
+

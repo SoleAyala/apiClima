@@ -1,0 +1,41 @@
+# Everything the developer needs in addition to the production requirements
+-r prod.txt
+
+# Testing
+factory-boy==3.3.0
+pytest==8.2.1
+pytest-cov==5.0.0
+WebTest==3.0.0
+
+# Lint and code style
+black==24.4.2
+flake8-blind-except==0.2.1
+flake8-debugger==4.1.2
+flake8-docstrings==1.7.0
+flake8-isort==6.1.1
+flake8==7.0.0
+isort==5.13.2
+pep8-naming==0.14.1
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+greenlet==3.0.3
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.29
+virtualenv==20.25.2
+Flask-APScheduler==1.13.1
+pandas==2.2.2
+pytz~=2024.1
+requests==2.32.2
+#Personales
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+greenlet==3.0.3
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.29
+virtualenv==20.25.2
+Flask-APScheduler==1.13.1
+pandas==2.2.2
+pytz~=2024.1
+requests==2.32.2
+
+
