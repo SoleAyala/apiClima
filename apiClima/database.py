@@ -87,3 +87,19 @@ def reference_col(
         nullable=nullable,
         **column_kwargs,
     )
+
+
+
+
+#tabla clima_dia
+class ClimaDia(PkModel):
+    __tablename__ = 'clima_dia'
+    temp_max = Column(db.Integer, nullable=False)
+    temp_min = Column(db.Integer, nullable=False)
+
+class Precipitacion(PkModel):
+    __tablename__ = 'precipitacion'
+    fecha = Column(db.Date, nullable=False)
+    cantidad = Column(db.Float, nullable=False)
+    tipo = Column(db.String(50), nullable=False)
+
