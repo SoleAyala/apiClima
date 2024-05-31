@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
+from apiClima.src.util.log import setup_logger
+from flask_apscheduler import APScheduler
 
 load_dotenv()  # Carga las variables de entorno desde el archivo .env
 
@@ -19,6 +21,21 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+# Schedule
+app.config.from_object(True)
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
+
+# Logging
+setup_logger(app)
+def get_logger():
+    return app.logger
+
+logger = get_logger()
+
 
 # Modelo Clima existente
 class Clima(db.Model):

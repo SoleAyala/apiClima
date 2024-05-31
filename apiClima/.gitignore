@@ -52,7 +52,7 @@ env/
 /apiClima/static/build/
 
 # Configuration
-.env
+../.env
 
 # Development database
 *.db
