@@ -1,10 +1,10 @@
+# app.py
 import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
-from apiClima.src.util.log import setup_logger
 from flask_apscheduler import APScheduler
 
 load_dotenv()  # Carga las variables de entorno desde el archivo .env
@@ -22,48 +22,24 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-# Schedule
-app.config.from_object(True)
+# Configuración del scheduler
+app.config['SCHEDULER_API_ENABLED'] = True
 scheduler = APScheduler()
 scheduler.init_app(app)
-scheduler.start()
-
+scheduler.start()  # Asegúrate de que el scheduler se inicie
 
 # Logging
+def setup_logger(app):
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    app.logger.addHandler(handler)
+
 setup_logger(app)
-def get_logger():
-    return app.logger
 
-logger = get_logger()
+# Importa las tareas después de configurar el scheduler
+import src.api.history_hour_bulk
 
-
-# Modelo Clima existente
-class Clima(db.Model):
-    __tablename__ = 'clima'
-    id = db.Column(db.Integer, primary_key=True)
-    tem_min = db.Column(db.Float, nullable=False)
-    tem_max = db.Column(db.Float, nullable=False)
-
-# Nuevo Modelo Precipitacion
-class Precipitacion(db.Model):
-    __tablename__ = 'precipitacion'
-    id = db.Column(db.Integer, primary_key=True)
-    fecha = db.Column(db.Date, nullable=False)
-    cantidad = db.Column(db.Float, nullable=False)
-    unidad = db.Column(db.String(10), nullable=False)
-
-# Nuevo Modelo Viento
-class Viento(db.Model):
-    __tablename__ = 'viento'
-    id = db.Column(db.Integer, primary_key=True)
-    fecha = db.Column(db.Date, nullable=False)
-    velocidad = db.Column(db.Float, nullable=False)
-    direccion = db.Column(db.String(50), nullable=False)
-
-@app.route('/')
-def index():
-    return "¡Bienvenido a la API del Clima!"
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run()
