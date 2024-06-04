@@ -25,7 +25,7 @@ virtualenv==20.25.2
 Flask-APScheduler==1.13.1
 pandas==2.2.2
 pytz~=2024.1
-requests==2.32.2
+requests==2.32.3
 
 #Personales
 Flask-Migrate==4.0.7
