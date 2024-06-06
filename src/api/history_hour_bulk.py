@@ -25,6 +25,13 @@ def load_csv_to_db(file_path):
     data.to_sql(table_name, con=db.engine, if_exists='append', index=False)
     print(f'Tabla {table_name} creada y datos insertados exitosamente.')
 
+    # Mover el archivo a la carpeta de procesados
+    processed_folder = os.path.join(os.path.dirname(file_path), 'procesados')
+    if not os.path.exists(processed_folder):
+        os.makedirs(processed_folder)
+    shutil.move(file_path, os.path.join(processed_folder, os.path.basename(file_path)))
+    print(f'Archivo {file_path} movido a la carpeta de procesados.')
+
 @scheduler.task('cron', id='job_cron', minute='*/1')
 def tarea_programada():
     with app.app_context():  # Asegura que la tarea se ejecute dentro del contexto de la aplicación Flask

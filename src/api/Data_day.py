@@ -35,7 +35,6 @@ def clima_actual(lat, lon, api_key, exclude):
     temp_tarde: str
     temp_nocturna: str
     sensacion_mañana: str
-    sensacion_diurna: str
     sensacion_tarde: str
     sensacion_nocturna: str
     presion_atmosferica: str
@@ -50,6 +49,8 @@ def clima_actual(lat, lon, api_key, exclude):
     volumen_lluvia: str
     volumen_nieve: str
     indice_uv: str
+    sensacion_diurna: str
+
 
     # Datos de los 8 días, el primer día es el día actual
     for day in daily_data:
