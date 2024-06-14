@@ -1,4 +1,4 @@
-Entorno Virtual =
+Entorno/Ambiente Virtual =
 1.
 python -m venv mienv
 mienv\Scripts\activate
@@ -18,6 +18,9 @@ pip freeze
 pip freeze > requirements.txt
 
 
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 NSSM =
 Descargar:
 https://nssm.cc/usage
@@ -28,10 +31,10 @@ https://www.nssm.cc/builds
 2. Agregar al path el directorio 'win64' del archivo descomprrimido.
 3. Ver lista de comandos/opciones = ejecutar nssm en el CMD. Ejecutar los comandos como Administrador.
 4. Ejecutar como Administrador para Crear el servicio = nssm install TuServicioFlask "C:\ruta\a\python.exe" "C:\ruta\a\app.py"
-    Ejemplo = nssm install apiclima "C:\Users\Konecta NB000113\AppData\Local\Programs\Python\Python39\python.exe" "C:\Users\Konecta NB000113\Desktop\Nuevos\Trabajo\Agro Marketing\Repositorio 2.0\apiClima\apiClima\src\api\__main__.py"
+    Ejemplo = nssm install apiclima "C:\Users\NB000113\AppData\Local\Programs\Python\Python39\python.exe" "C:\Users\NB000113\Desktop\Nuevos\Trabajo\Agro Marketing\Repositorio 2.0\apiClima\apiClima\src\api\__main__.py"
 5. Ejecutar como Administrador =
     nssm edit apiclima
-    5.1. En la pestaña 'I/O' especificar las rutas de los archivos donde deseas guardar los logs de salida estándar y los logs de errores.4
+    5.1. En la pestaña 'I/O' especificar las rutas de los archivos donde deseas guardar los logs de salida estándar y los logs de errores.
     5.2 Además, en la pestaña 'Application', en la opción 'Arguments' colocar entre comillas dobles (") el dato.
 6. Ejecutar como Administrador para Iniciar el servicio =
     nssm start apiclima
