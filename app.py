@@ -1,4 +1,3 @@
-import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -7,6 +6,8 @@ from dotenv import load_dotenv
 from flask_apscheduler import APScheduler
 import urllib.parse
 from apiClima.src.util.log import setup_logger
+from waitress import serve
+
 
 load_dotenv()  # Carga las variables de entorno desde el archivo .env
 app = Flask(__name__)
@@ -31,12 +32,6 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()  # Asegúrate de que el scheduler se inicie
 
-
-# Importa las tareas después de configurar el scheduler
-import apiClima.src.api.history_hour_bulk
-import apiClima.src.shedules.shedule_historico_bulk
-import apiClima.src.shedules.shedule_only_hour
-import apiClima.src.shedules.shedule_only_hour
 
 # Definición de modelos para las tablas en base de datos
 class DiarioDia(db.Model):
@@ -130,5 +125,5 @@ class Distritos(db.Model):
     appid = db.Column(db.String)
 
 if __name__ == "__main__":
-    app.run()
-
+    serve(app, host='0.0.0.0', port=8080)  # http://localhost:8080/
+    logger.info("Servidor Waitress iniciado")

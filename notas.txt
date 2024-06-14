@@ -21,6 +21,18 @@ pip freeze > requirements.txt
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
+Solo crear la base de datos, las tablas/secuencias/etc se crearan solas con FLASK =
+
+Pasos para trabajar con flask en base de datos, ejecutar los siguientes comandos:
+
+flask db init // solo una vez
+flask db migrate -m "Add table" //es como un commit
+flask db upgrade //pull de los cambios a la base de datos
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 NSSM =
 Descargar:
 https://nssm.cc/usage
