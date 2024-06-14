@@ -7,7 +7,6 @@ def setup_logger():
     # Crea un logger
     logger = logging.getLogger('ApiClima')
     logger.setLevel(logging.INFO)  # Ajusta esto a tu necesidad, por ejemplo, DEBUG, ERROR, etc.
-    logger.set
     # Define el path donde quieres guardar los logs
     log_directory = os.path.join(os.path.expanduser("~"), 'Desktop', 'api_clima_logs')
     if not os.path.exists(log_directory):

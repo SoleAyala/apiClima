@@ -1,6 +1,6 @@
 import datetime
 import logging
-from apiClima.app import DiarioDia, db, FuturoDia
+
 from apiClima.src.util.time import timestampToDate
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
@@ -19,6 +19,7 @@ def climaRequest(data):
 
 
 def  cargaTablaDiarioDia(day):
+    from apiClima.app import DiarioDia, db
 
     fecha = day['dt']
     salida_sol = day['sunrise']
@@ -91,6 +92,7 @@ def  cargaTablaDiarioDia(day):
 
 
 def cargaTablaFuturoDia(data):
+    from apiClima.app import db, FuturoDia
     daily_data = data['daily']
     for day in daily_data[1:]:
         fecha = day['dt']

@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 from flask_apscheduler import APScheduler
 import urllib.parse
-from src.util.log import setup_logger  # Asegúrate de tener la ruta correcta de importación
+from apiClima.src.util.log import setup_logger
 
 load_dotenv()  # Carga las variables de entorno desde el archivo .env
 app = Flask(__name__)

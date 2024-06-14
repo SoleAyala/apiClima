@@ -2,7 +2,7 @@ import datetime
 import time
 
 import requests
-from apiClima.app import scheduler, Distritos, DiarioDia, FuturoDia
+from apiClima.app import scheduler
 from apiClima.src.api.Data_day import  cargaTablaDiarioDia, cargaTablaFuturoDia
 from apiClima.src.api.history_hour_api import insert_history_hour_api
 import logging
@@ -15,6 +15,7 @@ logger = logging.getLogger('ApiClima')
 
 @scheduler.task('cron', id='job_cron_hourly_except_midnight', hour='1-23', minute=1)
 def climaRequestDayliAndFuture():
+    from apiClima.app import Distritos, DiarioDia, FuturoDia
     global parameters
     url = "https://api.openweathermap.org/data/3.0/onecall"
     contador = 0
