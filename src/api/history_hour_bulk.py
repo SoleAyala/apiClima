@@ -1,6 +1,7 @@
+import shutil
 import pandas as pd
 import os
-from app import db, scheduler, app  # Importa db, scheduler y app desde app.py
+from apiClima.app import db, scheduler, app  # Importa db, scheduler y app desde app.py
 
 def load_csv_to_db(file_path):
     # Leer el archivo CSV
@@ -32,9 +33,4 @@ def load_csv_to_db(file_path):
     shutil.move(file_path, os.path.join(processed_folder, os.path.basename(file_path)))
     print(f'Archivo {file_path} movido a la carpeta de procesados.')
 
-@scheduler.task('cron', id='job_cron', minute='*/1')
-def tarea_programada():
-    with app.app_context():  # Asegura que la tarea se ejecute dentro del contexto de la aplicación Flask
-        file_path = 'C:\\Users\\Konecta NB000114\\Documents\\ITAKYRY.csv'  # Actualiza esta ruta al archivo CSV
-        load_csv_to_db(file_path)
-        print('Tarea programada ejecutada.')
+
