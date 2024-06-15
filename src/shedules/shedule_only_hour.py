@@ -1,9 +1,8 @@
 import datetime
 import time
-
 import requests
 from apiClima.app import scheduler
-from apiClima.src.api.Data_day import  cargaTablaDiarioDia, cargaTablaFuturoDia
+from apiClima.src.api.Data_day import cargaTablaDiarioDia, cargaTablaFuturoDia
 from apiClima.src.api.history_hour_api import insert_history_hour_api
 import logging
 
@@ -15,19 +14,20 @@ logger = logging.getLogger('ApiClima')
 
 @scheduler.task('cron', id='job_cron_hourly_except_midnight', hour='1-23', minute=1)
 def climaRequestDayliAndFuture():
-    from apiClima.app import Distritos, DiarioDia, FuturoDia
+    from apiClima.app import Distritos, DiarioDia, FuturoDia, Configuraciones
     global parameters
     url = "https://api.openweathermap.org/data/3.0/onecall"
     contador = 0
-
+    appid = ''
     # Obtener todos los distritos activos
     distritos_activos = Distritos.query.filter_by(activo=True).all()
 
     for distrito in distritos_activos:
+        appid = Configuraciones.filter_by(parametro=distrito.appid).first()
         parameters = {
             'lat': distrito.latitud,
             'lon': distrito.longitud,
-            'appid': distrito.appid,
+            'appid': appid,
             'units': 'metric',  # Celsius
             'lang': 'es',  # Español
         }
@@ -40,14 +40,16 @@ def climaRequestDayliAndFuture():
             insert_history_hour_api(distrito.id, data)
 
             if verificar_registros_fecha(DiarioDia, datetime.date.today().isoformat()):
-                logger.info(f'Se realizará la carga de la tabla diario_dia  desde la consulta de horas, Hora:{datetime.datetime}')
+                logger.info(
+                    f'Se realizará la carga de la tabla diario_dia  desde la consulta de horas, Hora:{datetime.datetime}')
                 daily_data = data['daily']
                 # Datos del primer día (día actual)
                 day = daily_data[0]
                 cargaTablaDiarioDia(day)
 
             if verificar_registros_fecha(FuturoDia, datetime.date.today.isoformat()):
-                logger.info(f'Se realizará la carga de la tabla futuro_dia desde la consulta de horas, Hora:{datetime.datetime}')
+                logger.info(
+                    f'Se realizará la carga de la tabla futuro_dia desde la consulta de horas, Hora:{datetime.datetime}')
                 cargaTablaFuturoDia(data)
         else:
 

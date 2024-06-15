@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger('ApiClima')
 @scheduler.task('cron', id='job_cron_midnight', hour='0', minute='1')
 def climaRequestDayliAndFuture():
-    from apiClima.app import Distritos
+    from apiClima.app import Distritos, Configuraciones
     logger.info('Ejecutando carga de pronóstico diario y futuro')
     global parameters
     url = "https://api.openweathermap.org/data/3.0/onecall"
@@ -21,11 +21,11 @@ def climaRequestDayliAndFuture():
     distritos_activos = Distritos.query.filter_by(activo=True).all()
 
     for distrito in distritos_activos:
-
+        appid = Configuraciones.filter_by(parametro=distrito.appid).first()
         parameters = {
             'lat': distrito.latitud,
             'lon': distrito.longitud,
-            'appid': distrito.appid,
+            'appid': appid,
             'units': 'metric',  # Celsius
             'lang': 'es',  # Español
         }

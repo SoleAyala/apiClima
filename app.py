@@ -1,4 +1,4 @@
-import logging
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -39,10 +39,34 @@ import apiClima.src.shedules.shedule_only_hour
 import apiClima.src.shedules.shedule_only_hour
 
 # Definición de modelos para las tablas en base de datos
+
+
+
+class Configuraciones(db.Model):
+    __tablename__ = 'configuraciones'
+    id = db.Column(db.Integer, primary_key=True)
+    parametro = db.Column(db.String)
+    valor = db.Column(db.String)
+    fecha_hora_actualizacion = db.Column(db.DateTime)
+
+class Distritos(db.Model):
+    __tablename__ = 'distritos'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String)
+    latitud = db.Column(db.Float)
+    longitud = db.Column(db.Float)
+    activo = db.Column(db.Boolean)
+    departamento = db.Column(db.String)
+    observacion = db.Column(db.String)
+    region = db.Column(db.String)
+    fecha_carga_bulk = db.Column(db.DateTime)
+    fecha_ini_apiclima = db.Column(db.DateTime)
+    appid = db.Column(db.String)
+
 class DiarioDia(db.Model):
     __tablename__ = 'diario_dia'
     id = db.Column(db.Integer, primary_key=True)
-    id_distrito = db.Column(db.Integer)
+    id_distrito = db.Column(db.Integer, db.ForeignKey('distritos.id'))
     fecha_hora_actualizacion = db.Column(db.DateTime)
     fecha = db.Column(db.String)
     salida_sol = db.Column(db.String)
@@ -76,7 +100,7 @@ class DiarioDia(db.Model):
 class FuturoDia(db.Model):
     __tablename__ = 'futuro_dia'
     id = db.Column(db.Integer, primary_key=True)
-    id_distrito = db.Column(db.Integer)
+    id_distrito = db.Column(db.Integer, db.ForeignKey('distritos.id'))
     fecha_hora_actualizacion = db.Column(db.DateTime)
     fecha = db.Column(db.String)
     salida_sol = db.Column(db.String)
@@ -107,27 +131,6 @@ class FuturoDia(db.Model):
     volumen_nieve = db.Column(db.String)
     indice_uv = db.Column(db.String)
 
-
-class Configuraciones(db.Model):
-    __tablename__ = 'configuraciones'
-    id = db.Column(db.Integer, primary_key=True)
-    parametro = db.Column(db.String)
-    valor = db.Column(db.String)
-    fecha_hora_actualizacion = db.Column(db.DateTime)
-
-class Distritos(db.Model):
-    __tablename__ = 'distritos'
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String)
-    latitud = db.Column(db.Float)
-    longitud = db.Column(db.Float)
-    activo = db.Column(db.Boolean)
-    departamento = db.Column(db.String)
-    observacion = db.Column(db.String)
-    region = db.Column(db.String)
-    fecha_carga_bulk = db.Column(db.DateTime)
-    fecha_ini_apiclima = db.Column(db.DateTime)
-    appid = db.Column(db.String)
 
 if __name__ == "__main__":
     app.run()
