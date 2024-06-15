@@ -1,4 +1,4 @@
-
+import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from flask_apscheduler import APScheduler
 import urllib.parse
 from apiClima.src.util.log import setup_logger
+from waitress import serve
+
 
 load_dotenv()  # Carga las variables de entorno desde el archivo .env
 app = Flask(__name__)
@@ -133,5 +135,5 @@ class FuturoDia(db.Model):
 
 
 if __name__ == "__main__":
-    app.run()
-
+    serve(app, host='0.0.0.0', port=8080)  # http://localhost:8080/
+    logger.info("Servidor Waitress iniciado")

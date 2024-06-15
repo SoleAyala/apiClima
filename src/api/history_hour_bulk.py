@@ -1,7 +1,11 @@
+import logging
 import shutil
 import pandas as pd
 import os
-from apiClima.app import db, scheduler, app  # Importa db, scheduler y app desde app.py
+from apiClima.app import db
+
+# Obtener la instancia del logger configurado
+logger = logging.getLogger('ApiClima')
 
 def load_csv_to_db(file_path):
     # Leer el archivo CSV
@@ -24,13 +28,13 @@ def load_csv_to_db(file_path):
 
     # Insertar los datos del CSV en la tabla
     data.to_sql(table_name, con=db.engine, if_exists='append', index=False)
-    print(f'Tabla {table_name} creada y datos insertados exitosamente.')
+    logger.info(f'Tabla {table_name} creada y datos insertados exitosamente.')
 
     # Mover el archivo a la carpeta de procesados
     processed_folder = os.path.join(os.path.dirname(file_path), 'procesados')
     if not os.path.exists(processed_folder):
         os.makedirs(processed_folder)
     shutil.move(file_path, os.path.join(processed_folder, os.path.basename(file_path)))
-    print(f'Archivo {file_path} movido a la carpeta de procesados.')
+    logger.info(f'Archivo {file_path} movido a la carpeta de procesados.')
 
 

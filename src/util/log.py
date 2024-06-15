@@ -25,7 +25,3 @@ def setup_logger():
     logger.addHandler(handler)
 
     return logger
-
-
-# Configura el logger
-logger = setup_logger()
