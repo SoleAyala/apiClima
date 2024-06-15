@@ -2,7 +2,7 @@ import logging
 import shutil
 import pandas as pd
 import os
-from apiClima.app import db
+from apiClima.app import db, Configuraciones
 
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
@@ -31,7 +31,7 @@ def load_csv_to_db(file_path):
     logger.info(f'Tabla {table_name} creada y datos insertados exitosamente.')
 
     # Mover el archivo a la carpeta de procesados
-    processed_folder = os.path.join(os.path.dirname(file_path), 'procesados')
+    processed_folder = Configuraciones.filter_by(parametro='path_bulk_procesados').first()
     if not os.path.exists(processed_folder):
         os.makedirs(processed_folder)
     shutil.move(file_path, os.path.join(processed_folder, os.path.basename(file_path)))

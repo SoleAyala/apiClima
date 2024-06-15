@@ -1,4 +1,4 @@
-from apiClima.app import scheduler, app
+from apiClima.app import scheduler, app, Configuraciones
 from apiClima.src.api.history_hour_bulk import load_csv_to_db
 import glob
 
@@ -7,7 +7,8 @@ import glob
 def carga_historico_hora_bulk():
     with app.app_context():
         # Busca todos los archivos CSV en el directorio especificado
-        directory_path = 'C:\\Users\\Konecta NB000114\\Documents\\*.csv'
+        path = Configuraciones.filter_by(parametro='path_bulk_procesar').first()
+        directory_path = (path+'\\*.csv')
         csv_files = glob.glob(directory_path)
 
         # Procesa cada archivo encontrado
