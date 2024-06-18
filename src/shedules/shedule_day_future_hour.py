@@ -9,7 +9,7 @@ import logging
 
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
-@scheduler.task('cron', id='job_cron_midnight', hour='0', minute='1')
+#@scheduler.task('cron', id='job_cron_midnight', hour='0', minute='1')
 def climaRequestDayliAndFuture():
     from apiClima.app import Distritos, Configuraciones
     logger.info('Ejecutando carga de pronóstico diario y futuro')

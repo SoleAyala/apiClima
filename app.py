@@ -1,28 +1,30 @@
 import logging
-from flask import Flask
+from flask import Flask, app, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
 from flask_apscheduler import APScheduler
 import urllib.parse
+
+from sqlalchemy import true
+
 from apiClima.src.util.log import setup_logger
-from waitress import serve
+
+
+
 
 
 load_dotenv()  # Carga las variables de entorno desde el archivo .env
 app = Flask(__name__)
-logger = setup_logger()  # Inicia el logger
+#logger = setup_logger()  # Inicia el logger
 
 # Configuración de la base de datos
 DATABASE_URL = os.getenv('DATABASE_URL')
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL not set in the environment")
 
-# Verifica la URL decodificando los caracteres especiales
-parsed_url = urllib.parse.unquote(DATABASE_URL)
-print(f"Parsed DATABASE_URL: {parsed_url}")
-app.config['SQLALCHEMY_DATABASE_URI'] = f"{parsed_url}"
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -31,8 +33,7 @@ migrate = Migrate(app, db)
 app.config['SCHEDULER_API_ENABLED'] = True
 scheduler = APScheduler()
 scheduler.init_app(app)
-scheduler.start()  # Asegúrate de que el scheduler se inicie
-
+scheduler.start()
 
 # Importa las tareas después de configurar el scheduler
 import apiClima.src.api.history_hour_bulk
@@ -41,6 +42,10 @@ import apiClima.src.shedules.shedule_only_hour
 import apiClima.src.shedules.shedule_only_hour
 
 # Definición de modelos para las tablas en base de datos
+
+@app.route('/')
+def index():
+    return "¡Bienvenido a la API del Clima!"
 
 
 
@@ -135,5 +140,4 @@ class FuturoDia(db.Model):
 
 
 if __name__ == "__main__":
-    serve(app, host='0.0.0.0', port=8080)  # http://localhost:8080/
-    logger.info("Servidor Waitress iniciado")
+    app.run(debug=True)
