@@ -8,7 +8,6 @@ def create_history_hour_table(id):
         attrs = {
             '__tablename__': f'historico_hora_api_clima_{id}',
             'id': db.Column(db.Integer, primary_key=True),
-            'id_distrito': db.Column(db.Integer),
             'fecha_hora_actualizacion': db.Column(db.DateTime),
             'sunrise': db.Column(db.Integer),
             'sunset': db.Column(db.Integer),
@@ -35,7 +34,6 @@ def create_history_hour_table(id):
 def insert_history_hour_api(id_distrito, data):
     Table = create_history_hour_table(id_distrito)
     weather = Table(
-        id_distrito=id_distrito,
         fecha_hora_actualizacion=datetime.datetime.fromtimestamp(data["current"]["dt"]),
         sunrise=data["current"]["sunrise"],
         sunset=data["current"]["sunset"],
