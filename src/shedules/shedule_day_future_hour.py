@@ -9,50 +9,54 @@ import logging
 
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
-#@scheduler.task('cron', id='job_cron_midnight', hour='0', minute='1')
+@scheduler.task('cron', id='job_cron_midnight', minute='*/1')
 def climaRequestDayliAndFuture():
-    from apiClima.app import Distritos, Configuraciones
-    logger.info('Ejecutando carga de pronóstico diario y futuro')
-    global parameters
-    url = "https://api.openweathermap.org/data/3.0/onecall"
-    contador = 0
+    from apiClima.app import Distritos, Configuraciones, app, db
+    with app.app_context():
+        logger.info('Ejecutando carga de pronóstico diario y futuro')
+        global parameters
+        url = "https://api.openweathermap.org/data/3.0/onecall"
+        contador = 0
 
-    # Obtener todos los distritos activos
-    distritos_activos = Distritos.query.filter_by(activo=True).all()
+        # Obtener todos los distritos activos
+        distritos_activos = db.session.query(Distritos).filter_by(activo=True).all()
+        print(distritos_activos)
 
-    for distrito in distritos_activos:
-        appid = Configuraciones.filter_by(parametro=distrito.appid).first()
-        parameters = {
-            'lat': distrito.latitud,
-            'lon': distrito.longitud,
-            'appid': appid,
-            'units': 'metric',  # Celsius
-            'lang': 'es',  # Español
-        }
-        response = requests.get(url, params=parameters)
+        for distrito in distritos_activos:
+            appid = db.session.query(Configuraciones).filter_by(parametro=distrito.appid).first().valor
+            parameters = {
+                'lat': distrito.latitud,
+                'lon': distrito.longitud,
+                'appid': appid,
+                'units': 'metric',  # Celsius
+                'lang': 'es',  # Español
+            }
+            response = requests.get(url, params=parameters)
 
-        if response.status_code == 200:
-            logger.info("OpenWeather ha retornado código 200")
-            data = response.json()
-            climaRequest(data)
-            logger.info('Tablas futuro_dia y diario_dia cargadas')
-            insert_history_hour_api(distrito.id, data)
-            logger.info('Tablas de granuralidad horaria cargadas')
+            if response.status_code == 200:
+                logger.info("OpenWeather ha retornado código 200")
+                data = response.json()
+                print(data)
+                climaRequest(data)
+                logger.info('Tablas futuro_dia y diario_dia cargadas')
+                logger.info('Iniciando carga  las 00 para las horas')
+                insert_history_hour_api(distrito.id, data)
+                logger.info('Tablas de granuralidad horaria cargadas')
 
-        else:
-            logger.error(f'OpenWeather presenta problemas en el request: {response.status_code}')
-            # La API está caída, usar el último registro válido
-            last_data = get_last_record_for_district(distrito.id)
-            if last_data:
-                insert_history_hour_api(distrito.id, last_data)
             else:
-                logger.info(f"No hay datos históricos para el distrito {distrito.id}")
+                logger.error(f'OpenWeather presenta problemas en el request: {response.status_code}')
+                # La API está caída, usar el último registro válido
+                last_data = get_last_record_for_district(distrito.id)
+                if last_data:
+                    insert_history_hour_api(distrito.id, last_data)
+                else:
+                    logger.info(f"No hay datos históricos para el distrito {distrito.id}")
 
-        contador += 1
-        # Cada 50 llamadas, pausa durante 60 segundos
-        if contador % 50 == 0:
-            logger.info(f'Pausa después de {contador} llamadas para evitar sobrepasar el límite de la API.')
-            time.sleep(60)  # Pausa de 1 minuto
+            contador += 1
+            # Cada 50 llamadas, pausa durante 60 segundos
+            if contador % 50 == 0:
+                logger.info(f'Pausa después de {contador} llamadas para evitar sobrepasar el límite de la API.')
+                time.sleep(60)  # Pausa de 1 minuto
 
 
 

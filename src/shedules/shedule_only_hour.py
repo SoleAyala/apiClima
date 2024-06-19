@@ -1,7 +1,6 @@
-import datetime
+from datetime import datetime
 import time
 import requests
-from apiClima.app import scheduler
 from apiClima.src.api.Data_day import cargaTablaDiarioDia, cargaTablaFuturoDia
 from apiClima.src.api.history_hour_api import insert_history_hour_api
 import logging

@@ -1,23 +1,16 @@
 import logging
-from flask import Flask, app, jsonify
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
 from flask_apscheduler import APScheduler
-import urllib.parse
-
-from sqlalchemy import true
 
 from apiClima.src.util.log import setup_logger
 
-
-
-
-
-load_dotenv()  # Carga las variables de entorno desde el archivo .env
+# Carga las variables de entorno desde el archivo .env
+load_dotenv()
 app = Flask(__name__)
-#logger = setup_logger()  # Inicia el logger
 
 # Configuración de la base de datos
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -39,16 +32,9 @@ scheduler.start()
 import apiClima.src.api.history_hour_bulk
 import apiClima.src.shedules.shedule_historico_bulk
 import apiClima.src.shedules.shedule_only_hour
-import apiClima.src.shedules.shedule_only_hour
+import apiClima.src.shedules.shedule_day_future_hour
 
 # Definición de modelos para las tablas en base de datos
-
-@app.route('/')
-def index():
-    return "¡Bienvenido a la API del Clima!"
-
-
-
 class Configuraciones(db.Model):
     __tablename__ = 'configuraciones'
     id = db.Column(db.Integer, primary_key=True)
@@ -138,6 +124,11 @@ class FuturoDia(db.Model):
     volumen_nieve = db.Column(db.String)
     indice_uv = db.Column(db.String)
 
+@app.route('/')
+def index():
+    return "¡Bienvenido a la API del Clima!"
 
-if __name__ == "__main__":
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)

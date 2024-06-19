@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import logging
 
 from apiClima.src.util.time import timestampToDate
@@ -93,8 +93,10 @@ def  cargaTablaDiarioDia(day):
 
 def cargaTablaFuturoDia(data):
     from apiClima.app import db, FuturoDia
-    daily_data = data['daily']
-    for day in daily_data[1:]:
+    contador = 0
+    for day in data[1:]:
+        contador= contador+1
+        print(f"Cargando dato {contador}")
         fecha = day['dt']
         salida_sol = day['sunrise']
         puesta_sol = day['sunset']
@@ -162,6 +164,6 @@ def cargaTablaFuturoDia(data):
         # Guardar en la base de datos
         db.session.add(nuevo_registro)
         db.session.commit()
-        logger.info("Carga Tabla futuro_dia realizada")
+        logger.info(f"Carga Tabla futuro_dia en el contador {contador} realizada")
 
 

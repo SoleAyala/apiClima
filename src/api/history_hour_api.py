@@ -1,11 +1,10 @@
 import datetime
-from flask_sqlalchemy import SQLAlchemy
+from apiClima.app import db
 
-db = SQLAlchemy()
 
 def create_history_hour_table(id):
-    class_name = f"historico_hora_api_clima_{id}"
-    if class_name not in db.Model._decl_class_registry:
+    class_name = f"historico_hora_api_clima_ID{id}"
+    if class_name not in db.metadata.tables:
         attrs = {
             '__tablename__': f'historico_hora_api_clima_{id}',
             'id': db.Column(db.Integer, primary_key=True),
@@ -28,7 +27,10 @@ def create_history_hour_table(id):
         model = type(class_name, (db.Model,), attrs)
         db.create_all()
         return model
-    return getattr(db.Model, class_name)
+    else:
+        return db.Model._decl_class_registry[class_name].class_
+
+
 
 def insert_history_hour_api(id_distrito, data):
     Table = create_history_hour_table(id_distrito)
