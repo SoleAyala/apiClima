@@ -1,54 +1,79 @@
 import datetime
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, Float, String, DateTime
+
 from apiClima.app import db
 
+dynamic_models = {}
 
 def create_history_hour_table(id):
-    class_name = f"historico_hora_api_clima_ID{id}"
-    if class_name not in db.metadata.tables:
-        attrs = {
-            '__tablename__': f'historico_hora_api_clima_{id}',
-            'id': db.Column(db.Integer, primary_key=True),
-            'fecha_hora_actualizacion': db.Column(db.DateTime),
-            'sunrise': db.Column(db.Integer),
-            'sunset': db.Column(db.Integer),
-            'temp': db.Column(db.Float),
-            'feels_like': db.Column(db.Float),
-            'pressure': db.Column(db.Integer),
-            'humidity': db.Column(db.Integer),
-            'dew_point': db.Column(db.Float),
-            'uvi': db.Column(db.Integer),
-            'clouds': db.Column(db.Integer),
-            'visibility': db.Column(db.Integer),
-            'wind_speed': db.Column(db.Float),
-            'wind_deg': db.Column(db.Integer),
-            'weather_description': db.Column(db.String)
-        }
-        model = type(class_name, (db.Model,), attrs)
+    class_name = f"HistoricoHoraApiClimaID{id}"
+    table_name = f"historico_hora_api_clima_{id}"
+
+    # Verificar si la tabla ya existe en el registro
+    if table_name in dynamic_models:
+        if dynamic_models[table_name] is None:  # La tabla existe, pero el modelo no está cargado
+            # Cargar el modelo si aún no está creado
+            model = create_model_for_table(table_name, class_name)
+            dynamic_models[table_name] = model
+            return model
+        return dynamic_models[table_name]
+
+    # Si la tabla no está en el registro y no estamos seguros de que exista, verificar y posiblemente crear
+    if not db.inspect(db.engine).has_table(table_name):
+        # Crear el modelo y la tabla si no existen
+        model = create_model_for_table(table_name, class_name)
         db.create_all()
+        dynamic_models[table_name] = model
         return model
     else:
-        return db.Model._decl_class_registry[class_name].class_
+        # La tabla existe pero no estaba en dynamic_models, cargar el modelo
+        model = create_model_for_table(table_name, class_name)
+        dynamic_models[table_name] = model
+        return model
 
 
+def create_model_for_table(table_name, class_name):
+    """Crea una definición de modelo dinámico basada en el nombre de la tabla y la clase."""
+    attrs = {
+        '__tablename__': table_name,
+        'id': Column(Integer, primary_key=True),
+        'fecha_hora_actualizacion': Column(DateTime),
+        'sunrise': Column(Integer),
+        'sunset': Column(Integer),
+        'temp': Column(Float),
+        'feels_like': Column(Float),
+        'pressure': Column(Integer),
+        'humidity': Column(Integer),
+        'dew_point': Column(Float),
+        'uvi': Column(Integer),
+        'clouds': Column(Integer),
+        'visibility': Column(Integer),
+        'wind_speed': Column(Float),
+        'wind_deg': Column(Integer),
+        'weather_description': Column(String)
+    }
+    return type(class_name, (db.Model,), attrs)
 
 def insert_history_hour_api(id_distrito, data):
+    current = data["current"]
     Table = create_history_hour_table(id_distrito)
-    weather = Table(
-        fecha_hora_actualizacion=datetime.datetime.fromtimestamp(data["current"]["dt"]),
-        sunrise=data["current"]["sunrise"],
-        sunset=data["current"]["sunset"],
-        temp=data["current"]["temp"],
-        feels_like=data["current"]["feels_like"],
-        pressure=data["current"]["pressure"],
-        humidity=data["current"]["humidity"],
-        dew_point=data["current"]["dew_point"],
-        uvi=int(data["current"]["uvi"]),
-        clouds=data["current"]["clouds"],
-        visibility=data["current"]["visibility"],
-        wind_speed=data["current"]["wind_speed"],
-        wind_deg=data["current"]["wind_deg"],
-        weather_description=data["current"]["weather"][0]["description"]
-    )
-    db.session.add(weather)
-    db.session.commit()
-
+    if Table:
+        weather_instance = Table(
+            fecha_hora_actualizacion=datetime.datetime.fromtimestamp(current["dt"]),
+            sunrise=current["sunrise"],
+            sunset=current["sunset"],
+            temp=current["temp"],
+            feels_like=current["feels_like"],
+            pressure=current["pressure"],
+            humidity=current["humidity"],
+            dew_point=current["dew_point"],
+            uvi=int(current["uvi"]),
+            clouds=current["clouds"],
+            visibility=current["visibility"],
+            wind_speed=current["wind_speed"],
+            wind_deg=current["wind_deg"],
+            weather_description=current["weather"][0]["description"]
+        )
+        db.session.add(weather_instance)
+        db.session.commit()

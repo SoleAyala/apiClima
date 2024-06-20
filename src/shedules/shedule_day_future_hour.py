@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import time
 import requests
 from apiClima.app import scheduler
@@ -9,7 +9,7 @@ import logging
 
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
-@scheduler.task('cron', id='job_cron_midnight', minute='*/1')
+@scheduler.task('cron', id='job_cron_midnight', minute='*/5')
 def climaRequestDayliAndFuture():
     from apiClima.app import Distritos, Configuraciones, app, db
     with app.app_context():
@@ -57,6 +57,7 @@ def climaRequestDayliAndFuture():
             if contador % 50 == 0:
                 logger.info(f'Pausa después de {contador} llamadas para evitar sobrepasar el límite de la API.')
                 time.sleep(60)  # Pausa de 1 minuto
+        logger.info("FINALIZANDO TAREA DE CARGA DE DIARIO Y FUTURO")
 
 
 
@@ -98,7 +99,20 @@ def get_last_record_for_district(id_distrito):
 
 
 def verificar_registros_fecha(modelo, fecha_consulta):
-    fecha_inicio = datetime.strptime(fecha_consulta, '%Y-%m-%d')
-    fecha_fin = fecha_inicio.replace(hour=23, minute=59, second=59)
-    registros = modelo.query.filter(modelo.fecha_hora_actualizacion.between(fecha_inicio, fecha_fin)).all()
+    # Convertir la cadena de fecha a una estructura de tiempo
+    fecha_inicio_struct = time.strptime(fecha_consulta, '%Y-%m-%d')
+
+    # Convertir la estructura de tiempo a una fecha y hora completa (00:00:00)
+    fecha_inicio = time.mktime(fecha_inicio_struct)
+
+    # Crear la fecha de fin (23:59:59 del mismo día)
+    fecha_fin_struct = time.strptime(fecha_consulta + " 23:59:59", '%Y-%m-%d %H:%M:%S')
+    fecha_fin = time.mktime(fecha_fin_struct)
+
+    # Convertir las marcas de tiempo a objetos datetime para la consulta
+    fecha_inicio_dt = datetime.fromtimestamp(fecha_inicio)
+    fecha_fin_dt = datetime.fromtimestamp(fecha_fin)
+
+    # Realizar la consulta en la base de datos
+    registros = modelo.query.filter(modelo.update_datetime.between(fecha_inicio_dt, fecha_fin_dt)).all()
     return len(registros) <= 0

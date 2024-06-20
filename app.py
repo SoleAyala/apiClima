@@ -6,11 +6,13 @@ import os
 from dotenv import load_dotenv
 from flask_apscheduler import APScheduler
 
+from apiClima.src.util.archivo import rebuild_dynamic_models
 from apiClima.src.util.log import setup_logger
 
 # Carga las variables de entorno desde el archivo .env
 load_dotenv()
 app = Flask(__name__)
+dynamic_models = {}
 
 # Configuración de la base de datos
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -34,6 +36,7 @@ import apiClima.src.shedules.shedule_historico_bulk
 import apiClima.src.shedules.shedule_only_hour
 import apiClima.src.shedules.shedule_day_future_hour
 
+
 # Definición de modelos para las tablas en base de datos
 class Configuraciones(db.Model):
     __tablename__ = 'configuraciones'
@@ -41,6 +44,7 @@ class Configuraciones(db.Model):
     parametro = db.Column(db.String)
     valor = db.Column(db.String)
     fecha_hora_actualizacion = db.Column(db.DateTime)
+
 
 class Distritos(db.Model):
     __tablename__ = 'distritos'
@@ -56,79 +60,93 @@ class Distritos(db.Model):
     fecha_ini_apiclima = db.Column(db.DateTime)
     appid = db.Column(db.String)
 
+
 class DiarioDia(db.Model):
     __tablename__ = 'diario_dia'
     id = db.Column(db.Integer, primary_key=True)
-    id_distrito = db.Column(db.Integer, db.ForeignKey('distritos.id'))
-    fecha_hora_actualizacion = db.Column(db.DateTime)
-    fecha = db.Column(db.String)
-    salida_sol = db.Column(db.String)
-    puesta_sol = db.Column(db.String)
-    salida_luna = db.Column(db.String)
-    puesta_luna = db.Column(db.String)
-    fase_lunar = db.Column(db.String)
-    temp_maxima = db.Column(db.String)
-    temp_minima = db.Column(db.String)
-    temp_manana = db.Column(db.String)
-    temp_diurna = db.Column(db.String)
-    temp_tarde = db.Column(db.String)
-    temp_nocturna = db.Column(db.String)
-    sensacion_manana = db.Column(db.String)
-    sensacion_diurna = db.Column(db.String)
-    sensacion_tarde = db.Column(db.String)
-    sensacion_nocturna = db.Column(db.String)
-    presion_atmosferica = db.Column(db.String)
-    humedad = db.Column(db.String)
-    punto_rocio = db.Column(db.String)
-    velocidad_viento = db.Column(db.String)
-    rafagas_viento = db.Column(db.String)
-    direccion_viento = db.Column(db.String)
-    descripcion_clima = db.Column(db.String)
-    nubosidad = db.Column(db.String)
-    prob_precipitacion = db.Column(db.String)
-    volumen_lluvia = db.Column(db.String)
-    volumen_nieve = db.Column(db.String)
-    indice_uv = db.Column(db.String)
+    district_id = db.Column(db.Integer, db.ForeignKey('distritos.id'))
+    update_datetime = db.Column(db.DateTime)
+    date = db.Column(db.String)
+    sunrise = db.Column(db.String)
+    sunset = db.Column(db.String)
+    moonrise = db.Column(db.String)
+    moonset = db.Column(db.String)
+    lunar_phase = db.Column(db.String)
+    max_temp = db.Column(db.String)
+    min_temp = db.Column(db.String)
+    morning_temp = db.Column(db.String)
+    day_temp = db.Column(db.String)
+    afternoon_temp = db.Column(db.String)
+    night_temp = db.Column(db.String)
+    morning_feel = db.Column(db.String)
+    day_feel = db.Column(db.String)
+    afternoon_feel = db.Column(db.String)
+    night_feel = db.Column(db.String)
+    atmospheric_pressure = db.Column(db.String)
+    humidity = db.Column(db.String)
+    dew_point = db.Column(db.String)
+    wind_speed = db.Column(db.String)
+    wind_gusts = db.Column(db.String)
+    wind_direction = db.Column(db.String)
+    weather_description = db.Column(db.String)
+    cloudiness = db.Column(db.String)
+    precipitation_prob = db.Column(db.String)
+    rain_volume = db.Column(db.String)
+    snow_volume = db.Column(db.String)
+    uv_index = db.Column(db.String)
+
 
 class FuturoDia(db.Model):
     __tablename__ = 'futuro_dia'
     id = db.Column(db.Integer, primary_key=True)
-    id_distrito = db.Column(db.Integer, db.ForeignKey('distritos.id'))
-    fecha_hora_actualizacion = db.Column(db.DateTime)
-    fecha = db.Column(db.String)
-    salida_sol = db.Column(db.String)
-    puesta_sol = db.Column(db.String)
-    salida_luna = db.Column(db.String)
-    puesta_luna = db.Column(db.String)
-    fase_lunar = db.Column(db.String)
-    temp_maxima = db.Column(db.String)
-    temp_minima = db.Column(db.String)
-    temp_manana = db.Column(db.String)
-    temp_diurna = db.Column(db.String)
-    temp_tarde = db.Column(db.String)
-    temp_nocturna = db.Column(db.String)
-    sensacion_manana = db.Column(db.String)
-    sensacion_diurna = db.Column(db.String)
-    sensacion_tarde = db.Column(db.String)
-    sensacion_nocturna = db.Column(db.String)
-    presion_atmosferica = db.Column(db.String)
-    humedad = db.Column(db.String)
-    punto_rocio = db.Column(db.String)
-    velocidad_viento = db.Column(db.String)
-    rafagas_viento = db.Column(db.String)
-    direccion_viento = db.Column(db.String)
-    descripcion_clima = db.Column(db.String)
-    nubosidad = db.Column(db.String)
-    prob_precipitacion = db.Column(db.String)
-    volumen_lluvia = db.Column(db.String)
-    volumen_nieve = db.Column(db.String)
-    indice_uv = db.Column(db.String)
+    district_id = db.Column(db.Integer, db.ForeignKey('distritos.id'))
+    update_datetime = db.Column(db.DateTime)
+    date = db.Column(db.String)
+    sunrise = db.Column(db.String)
+    sunset = db.Column(db.String)
+    moonrise = db.Column(db.String)
+    moonset = db.Column(db.String)
+    lunar_phase = db.Column(db.String)
+    max_temp = db.Column(db.String)
+    min_temp = db.Column(db.String)
+    morning_temp = db.Column(db.String)
+    day_temp = db.Column(db.String)
+    afternoon_temp = db.Column(db.String)
+    night_temp = db.Column(db.String)
+    morning_feel = db.Column(db.String)
+    day_feel = db.Column(db.String)
+    afternoon_feel = db.Column(db.String)
+    night_feel = db.Column(db.String)
+    atmospheric_pressure = db.Column(db.String)
+    humidity = db.Column(db.String)
+    dew_point = db.Column(db.String)
+    wind_speed = db.Column(db.String)
+    wind_gusts = db.Column(db.String)
+    wind_direction = db.Column(db.String)
+    weather_description = db.Column(db.String)
+    cloudiness = db.Column(db.String)
+    precipitation_prob = db.Column(db.String)
+    rain_volume = db.Column(db.String)
+    snow_volume = db.Column(db.String)
+    uv_index = db.Column(db.String)
+
+
+from sqlalchemy import inspect
+
+
+
+
+
+
 
 @app.route('/')
 def index():
     return "¡Bienvenido a la API del Clima!"
 
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+    rebuild_dynamic_models()
     app.run(debug=True)
+

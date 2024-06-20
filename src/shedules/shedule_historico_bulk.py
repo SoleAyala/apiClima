@@ -3,7 +3,7 @@ import glob
 from apiClima.app import scheduler, db
 
 
-#@scheduler.task('cron', id='job_cron', hour = 0, minute='1')
+@scheduler.task('cron', id='job_cron', minute='*/3')
 def carga_historico_hora_bulk():
     from apiClima.app import app, Configuraciones
     with app.app_context():
