@@ -20,6 +20,15 @@ def climaRequest(data):
 
 def  cargaTablaDiarioDia(day):
     from apiClima.app import DiarioDia, db
+    # Limpiar la tabla FuturoDia antes de insertar nuevos datos
+    try:
+        num_rows_deleted = db.session.query(DiarioDia).delete()
+        db.session.commit()
+        logger.info(f"Tabla DiarioDia truncada, {num_rows_deleted} filas eliminadas.")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error al truncar la tabla: {e}")
+        return  # Detener la ejecución si no se puede truncar la tabla
 
     fecha = day['dt']
     salida_sol = day['sunrise']
@@ -93,6 +102,15 @@ def  cargaTablaDiarioDia(day):
 
 def cargaTablaFuturoDia(data):
     from apiClima.app import db, FuturoDia
+    # Limpiar la tabla FuturoDia antes de insertar nuevos datos
+    try:
+        num_rows_deleted = db.session.query(FuturoDia).delete()
+        db.session.commit()
+        logger.info(f"Tabla FuturoDia truncada, {num_rows_deleted} filas eliminadas.")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error al truncar la tabla: {e}")
+        return  # Detener la ejecución si no se puede truncar la tabla
     contador = 0
     for day in data[1:]:
         contador= contador+1
@@ -161,9 +179,11 @@ def cargaTablaFuturoDia(data):
             uvi=indice_uv
         )
 
+
         # Guardar en la base de datos
         db.session.add(nuevo_registro)
         db.session.commit()
+
         logger.info(f"Carga Tabla futuro_dia en el contador {contador} realizada")
 
 
