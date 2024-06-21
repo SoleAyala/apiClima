@@ -36,7 +36,7 @@ def create_model_for_table(table_name, class_name):
     attrs = {
         '__tablename__': table_name,
         'id': Column(Integer, primary_key=True),
-        'fecha_hora_actualizacion': Column(DateTime),
+        'update_datetime': Column(DateTime),
         'sunrise': Column(Integer),
         'sunset': Column(Integer),
         'temp': Column(Float),
@@ -49,6 +49,8 @@ def create_model_for_table(table_name, class_name):
         'visibility': Column(Integer),
         'wind_speed': Column(Float),
         'wind_deg': Column(Integer),
+        'rain_1h': Column(Float),
+        'wind_gust': Column(Float),
         'weather_description': Column(String)
     }
     return type(class_name, (db.Model,), attrs)
@@ -58,7 +60,7 @@ def insert_history_hour_api(id_distrito, data):
     Table = create_history_hour_table(id_distrito)
     if Table:
         weather_instance = Table(
-            fecha_hora_actualizacion=datetime.datetime.fromtimestamp(current["dt"]),
+            update_datetime=datetime.datetime.fromtimestamp(current["dt"]),
             sunrise=current["sunrise"],
             sunset=current["sunset"],
             temp=current["temp"],
@@ -71,6 +73,8 @@ def insert_history_hour_api(id_distrito, data):
             visibility=current["visibility"],
             wind_speed=current["wind_speed"],
             wind_deg=current["wind_deg"],
+            rain_1h=current.get("rain", {}).get("1h", 0),
+            wind_gust=current.get("wind_gust", 0),
             weather_description=current["weather"][0]["description"]
         )
         db.session.add(weather_instance)

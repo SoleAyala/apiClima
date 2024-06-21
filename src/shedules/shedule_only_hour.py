@@ -43,7 +43,7 @@ def climaRequestDayliAndFuture():
                 insert_history_hour_api(distrito.id, data)
 
                 if verificar_registros_fecha(DiarioDia, fecha_hoy) and verificar_registros_fecha(FuturoDia, fecha_hoy):
-                    logger.info(f'Se realizará la carga de la tabla diario_dia  y futuro_dia desde la consulta de horas, Hora:{time.strftime('%Y-%m-%d %H:%M:%S)}')}')
+                    logger.info(f"Se realizará la carga de la tabla diario_dia y futuro_dia desde la consulta de horas, Hora:{time.strftime('%Y-%m-%d %H:%M:%S)}')}")
                     climaRequest(data)
 
             else:

@@ -36,7 +36,7 @@ def load_csv_to_db(file_path):
 
     # Mover el archivo a la carpeta de procesados
     processed_folder = db.session.query(Configuraciones).filter_by(parametro='path_bulk_procesados').first().valor
-    print("El vañor de la ruta procesados es" + processed_folder)
+    print("El valor de la ruta procesados es" + processed_folder)
 
     try:
         if not os.path.exists(processed_folder):

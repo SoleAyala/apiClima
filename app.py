@@ -1,3 +1,4 @@
+from waitress import serve
 import logging
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -149,4 +150,9 @@ if __name__ == '__main__':
         db.create_all()
     rebuild_dynamic_models()
     app.run(debug=True)
+
+
+
+    # serve(app, host='0.0.0.0', port=8080)  # http://localhost:8080/
+    # logger.info("Servidor Waitress iniciado")
 
