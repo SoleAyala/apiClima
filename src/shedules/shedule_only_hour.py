@@ -1,11 +1,10 @@
-from datetime import datetime
+
 import time
 import requests
 from apiClima.app import scheduler, app, db
-from apiClima.src.api.Data_day import cargaTablaDiarioDia, cargaTablaFuturoDia, climaRequest
+from apiClima.src.api.Data_day import  climaRequest
 from apiClima.src.api.history_hour_api import insert_history_hour_api
 import logging
-
 from apiClima.src.shedules.shedule_day_future_hour import verificar_registros_fecha, get_last_record_for_district
 
 # Obtener la instancia del logger configurado

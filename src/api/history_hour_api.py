@@ -1,7 +1,5 @@
 import datetime
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, Float, String, DateTime
-
 from apiClima.app import db
 
 dynamic_models = {}
@@ -10,16 +8,16 @@ def create_history_hour_table(id):
     class_name = f"HistoricoHoraApiClimaID{id}"
     table_name = f"historico_hora_api_clima_{id}"
 
-    # Verificar si la tabla ya existe en el registro
+    # Verifica si la tabla ya existe en el registro
     if table_name in dynamic_models:
         if dynamic_models[table_name] is None:  # La tabla existe, pero el modelo no está cargado
-            # Cargar el modelo si aún no está creado
+            # Carga el modelo si aún no está creado
             model = create_model_for_table(table_name, class_name)
             dynamic_models[table_name] = model
             return model
         return dynamic_models[table_name]
 
-    # Si la tabla no está en el registro y no estamos seguros de que exista, verificar y posiblemente crear
+    # Si la tabla no está en el registro y no estamos seguros de que exista, verifica y posiblemente crear
     if not db.inspect(db.engine).has_table(table_name):
         # Crear el modelo y la tabla si no existen
         model = create_model_for_table(table_name, class_name)
