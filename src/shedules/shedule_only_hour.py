@@ -39,7 +39,7 @@ def climaRequestDayliAndFuture():
             if response.status_code == 200:
                 logger.info("OpenWeather ha retornado código 200")
                 data = response.json()
-                logger.info(f"Creando para el id {distrito.id}")
+                logger.info(f"Cargando para el Distrito con id {distrito.id}")
                 insert_history_hour_api(distrito.id, data)
 
                 if verificar_registros_fecha(DiarioDia, fecha_hoy) and verificar_registros_fecha(FuturoDia, fecha_hoy):
