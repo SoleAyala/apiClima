@@ -14,7 +14,7 @@ def load_csv_to_db(file_path):
     data = pd.read_csv(file_path)
 
     # Obtener el nombre del archivo sin la extensión
-    table_name = "historico_hora_bulk_ID_" + os.path.splitext(os.path.basename(file_path))[0][:-4]
+    table_name = "historico_hora_bulk_ID_" + os.path.splitext(os.path.basename(file_path))[0]
     print("Nombre de tabla: " + table_name)
 
     # Crear una clase dinámica para la tabla
