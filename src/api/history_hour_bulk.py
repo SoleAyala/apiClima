@@ -15,7 +15,7 @@ def load_csv_to_db(file_path):
 
     # Obtener el nombre del archivo sin la extensión
     table_name = "historico_hora_bulk_ID_" + os.path.splitext(os.path.basename(file_path))[0]
-    print("Nombre de tabla " + table_name)
+    print("Nombre de tabla: " + table_name)
 
     # Crear una clase dinámica para la tabla
     class DynamicTable(db.Model):
@@ -39,7 +39,7 @@ def load_csv_to_db(file_path):
 
     # Mover el archivo a la carpeta de procesados
     processed_folder = db.session.query(Configuraciones).filter_by(parametro='path_bulk_procesados').first().valor
-    print("El valor de la ruta procesados es" + processed_folder)
+    print("El valor de la ruta procesados es: " + processed_folder)
 
     try:
         if not os.path.exists(processed_folder):
