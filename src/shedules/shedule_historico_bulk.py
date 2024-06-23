@@ -1,3 +1,4 @@
+import os
 from apiClima.src.api.history_hour_bulk import load_csv_to_db, logger
 import glob
 from apiClima.app import scheduler, db
@@ -16,6 +17,15 @@ def carga_historico_hora_bulk():
         else:
             logger.error("No se encontró la configuración para 'path_bulk_procesar'")
             directory_path = None
+
+        # Verificar si la ruta tiene barras invertidas y normalizarlas
+        if os.name == 'nt':  # Si está en Windows
+            directory_path = directory_path.replace('/', '\\')
+            logger.info(f"Actualizada la ruta para Windows: {directory_path}")
+        else:  # Para sistemas Unix (Linux, macOS)
+            directory_path = directory_path.replace('\\', '/')
+            logger.info(f"Actualizada la ruta para Linux: {directory_path}")
+
 
         if directory_path:
             csv_files = glob.glob(directory_path)
