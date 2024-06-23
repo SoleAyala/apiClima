@@ -1,4 +1,6 @@
-import datetime
+import time
+from datetime import datetime
+
 from sqlalchemy import Column, Integer, Float, String, DateTime
 from apiClima.app import db
 
@@ -32,6 +34,7 @@ def create_history_hour_table(id):
 
 
 def create_model_for_table(table_name, class_name):
+
     """Crea una definición de modelo dinámico basada en el nombre de la tabla y la clase."""
     attrs = {
         '__tablename__': table_name,
@@ -56,11 +59,19 @@ def create_model_for_table(table_name, class_name):
     return type(class_name, (db.Model,), attrs)
 
 def insert_history_hour_api(id_distrito, data):
+    from apiClima.app import Distritos
     current = data["current"]
     Table = create_history_hour_table(id_distrito)
+
+    # Verificar si fecha_carga_bulk está vacía
+    distrito = Distritos.query.get(id_distrito)
+    if distrito.fecha_carga_bulk is None:
+        distrito.fecha_carga_bulk = time.strftime('%Y-%m-%d %H:%M:%S')
+        db.session.commit()
+
     if Table:
         weather_instance = Table(
-            update_datetime=datetime.datetime.fromtimestamp(current["dt"]),
+            update_datetime=datetime.fromtimestamp(current["dt"]),
             sunrise=current["sunrise"],
             sunset=current["sunset"],
             temp=current["temp"],

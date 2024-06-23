@@ -1,26 +1,24 @@
-from datetime import datetime
+import time
 import logging
 
 from apiClima.src.util.time import timestampToDate
+
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
 
-def timestampToDate(timestamp, timezone_offset):
-    return datetime.utcfromtimestamp(timestamp + timezone_offset).strftime('%Y-%m-%d %H:%M:%S')
 
-def climaRequest(data):
+def climaRequest(data, distrito_id):
     # Obtención de los datos de la sección 'daily'
     daily_data = data['daily']
     # Datos del primer día (día actual)
     day = daily_data[0]
-    cargaTablaDiarioDia(day)
-    cargaTablaFuturoDia(daily_data)
+    cargaTablaDiarioDia(day, distrito_id)
+    cargaTablaFuturoDia(daily_data, distrito_id)
 
 
-
-def  cargaTablaDiarioDia(day):
-    from apiClima.app import DiarioDia, db
-    # Limpiar la tabla FuturoDia antes de insertar nuevos datos
+def cargaTablaDiarioDia(day, distrito_id):
+    from apiClima.app import DiarioDia, db, Distritos
+    # Limpiar la tabla DiarioDia antes de insertar nuevos datos
     try:
         num_rows_deleted = db.session.query(DiarioDia).delete()
         db.session.commit()
@@ -58,11 +56,11 @@ def  cargaTablaDiarioDia(day):
     volumen_lluvia = day.get('rain', 0)
     volumen_nieve = day.get('snow', 0)
     indice_uv = day['uvi']
-    fecha_hora_actualizacion = datetime.utcnow()
+    fecha_hora_actualizacion = time.strftime('%Y-%m-%d %H:%M:%S')
 
     # Crear una instancia del modelo DiarioDia
     nuevo_registro = DiarioDia(
-        district_id=1,
+        district_id=distrito_id,
         update_datetime=fecha_hora_actualizacion,
         date=fecha,
         sunrise=salida_sol,
@@ -94,14 +92,27 @@ def  cargaTablaDiarioDia(day):
         uvi=indice_uv
     )
 
+    # Verificar si fecha_carga_bulk está vacía
+    distrito = Distritos.query.get(distrito_id)
+    if distrito.fecha_carga_bulk is None:
+        distrito.fecha_ini_apiclima = time.strftime('%Y-%m-%d %H:%M:%S')
+        db.session.commit()
+
     # Guardar en la base de datos
     db.session.add(nuevo_registro)
     db.session.commit()
     logger.info("Carga Tabla diario_dia realizada")
 
 
-def cargaTablaFuturoDia(data):
-    from apiClima.app import db, FuturoDia
+def cargaTablaFuturoDia(data, distrito_id):
+    from apiClima.app import db, FuturoDia, Distritos
+
+    # Verificar si fecha_carga_bulk está vacía
+    distrito = Distritos.query.get(distrito_id)
+    if distrito.fecha_carga_bulk is None:
+        distrito.fecha_ini_apiclima = time.strftime('%Y-%m-%d %H:%M:%S')
+        db.session.commit()
+
     # Limpiar la tabla FuturoDia antes de insertar nuevos datos
     try:
         num_rows_deleted = db.session.query(FuturoDia).delete()
@@ -113,7 +124,7 @@ def cargaTablaFuturoDia(data):
         return  # Detener la ejecución si no se puede truncar la tabla
     contador = 0
     for day in data[1:]:
-        contador= contador+1
+        contador = contador + 1
         print(f"Cargando dato {contador}")
         fecha = day['dt']
         salida_sol = day['sunrise']
@@ -143,11 +154,11 @@ def cargaTablaFuturoDia(data):
         volumen_lluvia = day.get('rain', 0)
         volumen_nieve = day.get('snow', 0)
         indice_uv = day['uvi']
-        fecha_hora_actualizacion = datetime.utcnow()
+        fecha_hora_actualizacion = time.strftime('%Y-%m-%d %H:%M:%S')
 
         # Crear una instancia del modelo DiarioDia
         nuevo_registro = FuturoDia(
-            district_id=1,
+            district_id=distrito_id,
             update_datetime=fecha_hora_actualizacion,
             date=fecha,
             sunrise=salida_sol,
@@ -179,11 +190,8 @@ def cargaTablaFuturoDia(data):
             uvi=indice_uv
         )
 
-
         # Guardar en la base de datos
         db.session.add(nuevo_registro)
         db.session.commit()
 
         logger.info(f"Carga Tabla futuro_dia en el contador {contador} realizada")
-
-

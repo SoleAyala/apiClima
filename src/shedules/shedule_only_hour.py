@@ -12,11 +12,12 @@ logger = logging.getLogger('ApiClima')
 
 
 #@scheduler.task('cron', id='job_cron_hourly_except_midnight', hour='1-23', minute=1)
-@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/4')
-def climaRequestDayliAndFuture():
+@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/1')
+def climaRequestHour():
     from apiClima.app import Distritos, DiarioDia, FuturoDia, Configuraciones
     with app.app_context():
         global parameters
+        logger.info(f"Iniciando carga horaria, Date: {time.strftime('%Y-%m-%d %H:%M:%S')}")
         fecha_hoy = time.strftime('%Y-%m-%d')
         url = "https://api.openweathermap.org/data/3.0/onecall"
         contador = 0
@@ -39,7 +40,7 @@ def climaRequestDayliAndFuture():
             if response.status_code == 200:
                 logger.info("OpenWeather ha retornado código 200")
                 data = response.json()
-                logger.info(f"Cargando para el Distrito con id {distrito.id}")
+                logger.info(f"Cargando clima hora para el Distrito con id {distrito.id}")
                 insert_history_hour_api(distrito.id, data)
 
                 if verificar_registros_fecha(DiarioDia, fecha_hoy) and verificar_registros_fecha(FuturoDia, fecha_hoy):

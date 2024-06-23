@@ -34,6 +34,9 @@ def load_csv_to_db(file_path):
     logger.info(f'Tabla {table_name} creada y datos insertados exitosamente.')
     print(f'Tabla {table_name} creada y datos insertados exitosamente.')
 
+    #Carga de fecha Bulk en Tabla distritos
+
+
     # Mover el archivo a la carpeta de procesados
     processed_folder = db.session.query(Configuraciones).filter_by(parametro='path_bulk_procesados').first().valor
     print("El valor de la ruta procesados es" + processed_folder)
