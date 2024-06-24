@@ -18,15 +18,7 @@ def climaRequest(data, distrito_id):
 
 def cargaTablaDiarioDia(day, distrito_id):
     from apiClima.app import DiarioDia, db, Distritos
-    # Limpiar la tabla DiarioDia antes de insertar nuevos datos
-    try:
-        num_rows_deleted = db.session.query(DiarioDia).delete()
-        db.session.commit()
-        logger.info(f"Tabla DiarioDia truncada, {num_rows_deleted} filas eliminadas.")
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error al truncar la tabla: {e}")
-        return  # Detener la ejecución si no se puede truncar la tabla
+
 
     fecha = day['dt']
     salida_sol = day['sunrise']

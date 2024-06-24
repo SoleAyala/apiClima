@@ -9,9 +9,9 @@ import logging
 
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
-@scheduler.task('cron', id='job_cron_midnight', hour='00', minute='1')
+#@scheduler.task('cron', id='job_cron_midnight', hour='00', minute='1')
 def climaRequestDayliAndFuture():
-    from apiClima.app import Distritos, Configuraciones, app, db
+    from apiClima.app import Distritos, Configuraciones, app, db, DiarioDia
     with app.app_context():
         logger.info('Ejecutando carga de pronóstico diario y futuro')
         global parameters
@@ -23,6 +23,17 @@ def climaRequestDayliAndFuture():
         print(distritos_activos)
 
         for distrito in distritos_activos:
+
+            # Limpiar la tabla DiarioDia antes de insertar nuevos datos
+            try:
+                num_rows_deleted = db.session.query(DiarioDia).delete()
+                db.session.commit()
+                logger.info(f"Tabla DiarioDia truncada, {num_rows_deleted} filas eliminadas.")
+            except Exception as e:
+                db.session.rollback()
+                logger.error(f"Error al truncar la tabla: {e}")
+                return  # Detener la ejecución si no se puede truncar la tabla
+
             appid = db.session.query(Configuraciones).filter_by(parametro=distrito.appid).first().valor
             parameters = {
                 'lat': distrito.latitud,
@@ -66,17 +77,20 @@ def climaRequestDayliAndFuture():
 
 def get_last_record_for_district(id_distrito):
     # Primero, obtén el modelo correcto para el distrito dado
+    logger.info("Obteniendo el modelo para el distrito {}".format(id_distrito))
     HistoryModel = create_history_hour_table(id_distrito)
+    logger.info(f"Modelo {HistoryModel} encontrado para el distrito".format(id_distrito))
 
     # Luego, consulta el último registro para ese modelo
-    last_record = HistoryModel.query.filter_by(id_distrito=id_distrito).order_by(
-        HistoryModel.fecha_hora_actualizacion.desc()).first()
+    logger.info("Realizando la consulta del ultimo registro")
+    last_record = HistoryModel.query.order_by(HistoryModel.update_datetime.desc()).first()
 
     if last_record:
+        logger.info("Encontrado el ultimo registro")
         # Si hay un registro, extrae los datos necesarios para replicar en un nuevo registro
         data = {
             "current": {
-                "dt": last_record.fecha_hora_actualizacion.timestamp(),  # Convierte datetime a timestamp
+                "dt": last_record.update_datetime.timestamp(),  # Convierte datetime a timestamp
                 "sunrise": last_record.sunrise,
                 "sunset": last_record.sunset,
                 "temp": last_record.temp,
@@ -94,7 +108,8 @@ def get_last_record_for_district(id_distrito):
                 }]
             }
         }
-        return data
+        return
+    logger.info("No existe el ultimo registro")
     return None
 
 
