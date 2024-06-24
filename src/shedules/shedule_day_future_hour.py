@@ -10,6 +10,7 @@ import logging
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
 #@scheduler.task('cron', id='job_cron_midnight', hour='00', minute='1')
+@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/3')
 def climaRequestDayliAndFuture():
     from apiClima.app import Distritos, Configuraciones, app, db, DiarioDia
     with app.app_context():
@@ -48,7 +49,7 @@ def climaRequestDayliAndFuture():
                 logger.info("OpenWeather ha retornado código 200")
                 data = response.json()
                 print(data)
-                climaRequest(data)
+                climaRequest(data, distrito.id)
                 logger.info('Tablas futuro_dia y diario_dia cargadas')
                 logger.info('Iniciando carga  las 00 para las horas')
                 insert_history_hour_api(distrito.id, data)
