@@ -42,7 +42,7 @@ environs==11.0.0
 Flask-SQLAlchemy==3.1.1
 greenlet==3.0.3
 psycopg2-binary==2.9.9
-virtualenv==20.25.2
+virtualenv==20.26.3
 Flask-APScheduler==1.13.1
 pandas==2.2.2
 pytz~=2024.1
