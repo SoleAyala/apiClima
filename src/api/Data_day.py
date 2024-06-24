@@ -86,7 +86,7 @@ def cargaTablaDiarioDia(day, distrito_id):
 
     # Verificar si fecha_carga_bulk está vacía
     distrito = Distritos.query.get(distrito_id)
-    if distrito.fecha_carga_bulk is None:
+    if distrito.fecha_ini_apiclima is None:
         distrito.fecha_ini_apiclima = time.strftime('%Y-%m-%d %H:%M:%S')
         db.session.commit()
 
