@@ -13,7 +13,7 @@ logger = logging.getLogger('ApiClima')
 #@scheduler.task('cron', id='job_cron_midnight', hour='00', minute='1')
 @scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/3')
 def climaRequestDayliAndFuture():
-    from apiClima.app import Distritos, Configuraciones, app, db, DiarioDia
+    from apiClima.app import Distritos, Configuraciones, app, db, DiarioDia, FuturoDia
     with app.app_context():
         logger.info('Ejecutando carga de pronóstico diario y futuro')
         global parameters
@@ -28,16 +28,17 @@ def climaRequestDayliAndFuture():
         try:
             num_rows_deleted = db.session.query(DiarioDia).delete()
             db.session.commit()
-            logger.info(f"Tabla FuturoDia truncada, {num_rows_deleted} filas eliminadas.")
+            logger.info(f"Tabla DiarioDia truncada, {num_rows_deleted} filas eliminadas.")
         except Exception as e:
             db.session.rollback()
             logger.error(f"Error al truncar la tabla: {e}")
             return  # Detener la ejecución si no se puede truncar la tabla
-            # Limpiar la tabla DiarioDia antes de insertar nuevos datos
+
+        # Limpiar la tabla FuturoDia antes de insertar nuevos datos
         try:
-            num_rows_deleted = db.session.query(DiarioDia).delete()
+            num_rows_deleted = db.session.query(FuturoDia).delete()
             db.session.commit()
-            logger.info(f"Tabla DiarioDia truncada, {num_rows_deleted} filas eliminadas.")
+            logger.info(f"Tabla FuturoDia truncada, {num_rows_deleted} filas eliminadas.")
         except Exception as e:
             db.session.rollback()
             logger.error(f"Error al truncar la tabla: {e}")
