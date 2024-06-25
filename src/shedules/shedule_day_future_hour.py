@@ -5,7 +5,8 @@ from apiClima.app import scheduler
 from apiClima.src.api.Data_day import climaRequest
 from apiClima.src.api.history_hour_api import insert_history_hour_api, create_history_hour_table
 import logging
-
+from requests.exceptions import ConnectionError, HTTPError, RequestException
+from urllib3.exceptions import ProtocolError
 
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
@@ -23,40 +24,51 @@ def climaRequestDayliAndFuture():
         distritos_activos = db.session.query(Distritos).filter_by(activo=True).all()
         print(distritos_activos)
 
-        for distrito in distritos_activos:
-
+        # Limpiar la tabla DiarioDia antes de insertar nuevos datos
+        try:
+            num_rows_deleted = db.session.query(DiarioDia).delete()
+            db.session.commit()
+            logger.info(f"Tabla FuturoDia truncada, {num_rows_deleted} filas eliminadas.")
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error al truncar la tabla: {e}")
+            return  # Detener la ejecución si no se puede truncar la tabla
             # Limpiar la tabla DiarioDia antes de insertar nuevos datos
+        try:
+            num_rows_deleted = db.session.query(DiarioDia).delete()
+            db.session.commit()
+            logger.info(f"Tabla DiarioDia truncada, {num_rows_deleted} filas eliminadas.")
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error al truncar la tabla: {e}")
+            return  # Detener la ejecución si no se puede truncar la tabla
+
+
+        for distrito in distritos_activos:
             try:
-                num_rows_deleted = db.session.query(DiarioDia).delete()
-                db.session.commit()
-                logger.info(f"Tabla DiarioDia truncada, {num_rows_deleted} filas eliminadas.")
-            except Exception as e:
-                db.session.rollback()
-                logger.error(f"Error al truncar la tabla: {e}")
-                return  # Detener la ejecución si no se puede truncar la tabla
+                appid = db.session.query(Configuraciones).filter_by(parametro=distrito.appid).first().valor
+                parameters = {
+                    'lat': distrito.latitud,
+                    'lon': distrito.longitud,
+                    'appid': appid,
+                    'units': 'metric',  # Celsius
+                    'lang': 'es',  # Español
+                }
+                response = requests.get(url, params=parameters)
 
-            appid = db.session.query(Configuraciones).filter_by(parametro=distrito.appid).first().valor
-            parameters = {
-                'lat': distrito.latitud,
-                'lon': distrito.longitud,
-                'appid': appid,
-                'units': 'metric',  # Celsius
-                'lang': 'es',  # Español
-            }
-            response = requests.get(url, params=parameters)
+                if response.status_code == 200:
+                    logger.info("OpenWeather ha retornado código 200")
+                    data = response.json()
+                    print(data)
+                    climaRequest(data, distrito.id)
+                    logger.info('Tablas futuro_dia y diario_dia cargadas')
+                    logger.info('Iniciando carga  las 00 para las horas')
+                    insert_history_hour_api(distrito.id, data)
+                    logger.info('Tablas de granuralidad horaria cargadas')
 
-            if response.status_code == 200:
-                logger.info("OpenWeather ha retornado código 200")
-                data = response.json()
-                print(data)
-                climaRequest(data, distrito.id)
-                logger.info('Tablas futuro_dia y diario_dia cargadas')
-                logger.info('Iniciando carga  las 00 para las horas')
-                insert_history_hour_api(distrito.id, data)
-                logger.info('Tablas de granuralidad horaria cargadas')
 
-            else:
-                logger.error(f'OpenWeather presenta problemas en el request: {response.status_code}')
+            except (ConnectionError, ProtocolError, HTTPError, RequestException) as e:
+                logger.error(f'Error al hacer request a OpenWeather: {e}')
                 # La API está caída, usar el último registro válido
                 last_data = get_last_record_for_district(distrito.id)
                 if last_data:

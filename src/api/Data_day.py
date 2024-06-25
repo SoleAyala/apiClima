@@ -104,15 +104,7 @@ def cargaTablaFuturoDia(data, distrito_id):
         distrito.fecha_ini_apiclima = time.strftime('%Y-%m-%d %H:%M:%S')
         db.session.commit()
 
-    # Limpiar la tabla FuturoDia antes de insertar nuevos datos
-    try:
-        num_rows_deleted = db.session.query(FuturoDia).delete()
-        db.session.commit()
-        logger.info(f"Tabla FuturoDia truncada, {num_rows_deleted} filas eliminadas.")
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error al truncar la tabla: {e}")
-        return  # Detener la ejecución si no se puede truncar la tabla
+
     contador = 0
     for day in data[1:]:
         contador = contador + 1
