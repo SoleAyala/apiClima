@@ -63,30 +63,26 @@ def insert_history_hour_api(id_distrito, data):
     current = data["current"]
     Table = create_history_hour_table(id_distrito)
 
-    # Verificar si fecha_carga_bulk está vacía
-    distrito = Distritos.query.get(id_distrito)
-    if distrito.fecha_carga_bulk is None:
-        distrito.fecha_carga_bulk = time.strftime('%Y-%m-%d %H:%M:%S')
-        db.session.commit()
 
     if Table:
         weather_instance = Table(
-            update_datetime=datetime.fromtimestamp(current["dt"]),
-            sunrise=current["sunrise"],
-            sunset=current["sunset"],
-            temp=current["temp"],
-            feels_like=current["feels_like"],
-            pressure=current["pressure"],
-            humidity=current["humidity"],
-            dew_point=current["dew_point"],
-            uvi=int(current["uvi"]),
-            clouds=current["clouds"],
-            visibility=current["visibility"],
-            wind_speed=current["wind_speed"],
-            wind_deg=current["wind_deg"],
-            rain_1h=current.get("rain", {}).get("1h", 0),
-            wind_gust=current.get("wind_gust", 0),
-            weather_description=current["weather"][0]["description"]
+            update_datetime=datetime.fromtimestamp(current.get("dt")),
+            sunrise=current.get("sunrise"),
+            sunset=current.get("sunset"),
+            temp=current.get("temp"),
+            feels_like=current.get("feels_like"),
+            pressure=current.get("pressure"),
+            humidity=current.get("humidity"),
+            dew_point=current.get("dew_point"),
+            uvi=int(current.get("uvi", 0)),  # Asumiendo que 'uvi' siempre debería ser un entero
+            clouds=current.get("clouds"),
+            visibility=current.get("visibility"),
+            wind_speed=current.get("wind_speed"),
+            wind_deg=current.get("wind_deg"),
+            rain_1h=current.get("rain", {}).get("1h", None),  # Cambiado a None si no hay información de lluvia
+            wind_gust=current.get("wind_gust"),  # Cambiado para ser None si no hay información
+            weather_description=current.get("weather", [{}])[0].get("description")
         )
+
         db.session.add(weather_instance)
         db.session.commit()

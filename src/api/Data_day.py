@@ -19,35 +19,34 @@ def climaRequest(data, distrito_id):
 def cargaTablaDiarioDia(day, distrito_id):
     from apiClima.app import DiarioDia, db, Distritos
 
-
-    fecha = day['dt']
-    salida_sol = day['sunrise']
-    puesta_sol = day['sunset']
-    salida_luna = day.get('moonrise', 0)
-    puesta_luna = day.get('moonset', 0)
-    fase_lunar = day.get('moon_phase', 'No disponible')
-    temp_maxima = day['temp']['max']
-    temp_minima = day['temp']['min']
-    temp_manana = day['temp']['morn']
-    temp_diurna = day['temp']['day']
-    temp_tarde = day['temp']['eve']
-    temp_nocturna = day['temp']['night']
-    sensacion_manana = day['feels_like']['morn']
-    sensacion_diurna = day['feels_like']['day']
-    sensacion_tarde = day['feels_like']['eve']
-    sensacion_nocturna = day['feels_like']['night']
-    presion_atmosferica = day['pressure']
-    humedad = day['humidity']
-    punto_rocio = day['dew_point']
-    velocidad_viento = day['wind_speed']
-    rafagas_viento = day.get('wind_gust', 0)
-    direccion_viento = day['wind_deg']
-    descripcion_clima = day['weather'][0]['description']
-    nubosidad = day['clouds']
-    prob_precipitacion = day['pop']
-    volumen_lluvia = day.get('rain', 0)
-    volumen_nieve = day.get('snow', 0)
-    indice_uv = day['uvi']
+    fecha = day.get('dt')
+    salida_sol = day.get('sunrise')
+    puesta_sol = day.get('sunset')
+    salida_luna = day.get('moonrise')
+    puesta_luna = day.get('moonset')
+    fase_lunar = day.get('moon_phase')
+    temp_maxima = day.get('temp', {}).get('max')
+    temp_minima = day.get('temp', {}).get('min')
+    temp_manana = day.get('temp', {}).get('morn')
+    temp_diurna = day.get('temp', {}).get('day')
+    temp_tarde = day.get('temp', {}).get('eve')
+    temp_nocturna = day.get('temp', {}).get('night')
+    sensacion_manana = day.get('feels_like', {}).get('morn')
+    sensacion_diurna = day.get('feels_like', {}).get('day')
+    sensacion_tarde = day.get('feels_like', {}).get('eve')
+    sensacion_nocturna = day.get('feels_like', {}).get('night')
+    presion_atmosferica = day.get('pressure')
+    humedad = day.get('humidity')
+    punto_rocio = day.get('dew_point')
+    velocidad_viento = day.get('wind_speed')
+    rafagas_viento = day.get('wind_gust')
+    direccion_viento = day.get('wind_deg')
+    descripcion_clima = day.get('weather', [{}])[0].get('description')
+    nubosidad = day.get('clouds')
+    prob_precipitacion = day.get('pop')
+    volumen_lluvia = day.get('rain')
+    volumen_nieve = day.get('snow')
+    indice_uv = day.get('uvi')
     fecha_hora_actualizacion = time.strftime('%Y-%m-%d %H:%M:%S')
 
     # Crear una instancia del modelo DiarioDia
@@ -101,7 +100,7 @@ def cargaTablaFuturoDia(data, distrito_id):
 
     # Verificar si fecha_carga_bulk está vacía
     distrito = Distritos.query.get(distrito_id)
-    if distrito.fecha_carga_bulk is None:
+    if distrito.fecha_ini_apiclima is None:
         distrito.fecha_ini_apiclima = time.strftime('%Y-%m-%d %H:%M:%S')
         db.session.commit()
 
@@ -118,36 +117,35 @@ def cargaTablaFuturoDia(data, distrito_id):
     for day in data[1:]:
         contador = contador + 1
         print(f"Cargando dato {contador}")
-        fecha = day['dt']
-        salida_sol = day['sunrise']
-        puesta_sol = day['sunset']
-        salida_luna = day.get('moonrise', 0)
-        puesta_luna = day.get('moonset', 0)
-        fase_lunar = day.get('moon_phase', 'No disponible')
-        temp_maxima = day['temp']['max']
-        temp_minima = day['temp']['min']
-        temp_manana = day['temp']['morn']
-        temp_diurna = day['temp']['day']
-        temp_tarde = day['temp']['eve']
-        temp_nocturna = day['temp']['night']
-        sensacion_manana = day['feels_like']['morn']
-        sensacion_diurna = day['feels_like']['day']
-        sensacion_tarde = day['feels_like']['eve']
-        sensacion_nocturna = day['feels_like']['night']
-        presion_atmosferica = day['pressure']
-        humedad = day['humidity']
-        punto_rocio = day['dew_point']
-        velocidad_viento = day['wind_speed']
-        rafagas_viento = day.get('wind_gust', 0)
-        direccion_viento = day['wind_deg']
-        descripcion_clima = day['weather'][0]['description']
-        nubosidad = day['clouds']
-        prob_precipitacion = day['pop']
-        volumen_lluvia = day.get('rain', 0)
-        volumen_nieve = day.get('snow', 0)
-        indice_uv = day['uvi']
+        fecha = day.get('dt')
+        salida_sol = day.get('sunrise')
+        puesta_sol = day.get('sunset')
+        salida_luna = day.get('moonrise')
+        puesta_luna = day.get('moonset')
+        fase_lunar = day.get('moon_phase')
+        temp_maxima = day.get('temp', {}).get('max')
+        temp_minima = day.get('temp', {}).get('min')
+        temp_manana = day.get('temp', {}).get('morn')
+        temp_diurna = day.get('temp', {}).get('day')
+        temp_tarde = day.get('temp', {}).get('eve')
+        temp_nocturna = day.get('temp', {}).get('night')
+        sensacion_manana = day.get('feels_like', {}).get('morn')
+        sensacion_diurna = day.get('feels_like', {}).get('day')
+        sensacion_tarde = day.get('feels_like', {}).get('eve')
+        sensacion_nocturna = day.get('feels_like', {}).get('night')
+        presion_atmosferica = day.get('pressure')
+        humedad = day.get('humidity')
+        punto_rocio = day.get('dew_point')
+        velocidad_viento = day.get('wind_speed')
+        rafagas_viento = day.get('wind_gust')
+        direccion_viento = day.get('wind_deg')
+        descripcion_clima = day.get('weather', [{}])[0].get('description')
+        nubosidad = day.get('clouds')
+        prob_precipitacion = day.get('pop')
+        volumen_lluvia = day.get('rain')
+        volumen_nieve = day.get('snow')
+        indice_uv = day.get('uvi')
         fecha_hora_actualizacion = time.strftime('%Y-%m-%d %H:%M:%S')
-
         # Crear una instancia del modelo DiarioDia
         nuevo_registro = FuturoDia(
             district_id=distrito_id,

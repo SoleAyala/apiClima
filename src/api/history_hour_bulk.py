@@ -2,13 +2,14 @@ import logging
 import shutil
 import pandas as pd
 import os
+import time
 
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
 
 
 def load_csv_to_db(file_path):
-    from apiClima.app import db, Configuraciones
+    from apiClima.app import db, Configuraciones, Distritos
 
     # Leer el archivo CSV
     data = pd.read_csv(file_path)
@@ -35,6 +36,12 @@ def load_csv_to_db(file_path):
     print(f'Tabla {table_name} creada y datos insertados exitosamente.')
 
     #Carga de fecha Bulk en Tabla distritos
+
+    # Verificar si fecha_carga_bulk está vacía
+    distrito = Distritos.query.get(os.path.splitext(os.path.basename(file_path))[0])
+    if distrito.fecha_carga_bulk is None:
+        distrito.fecha_carga_bulk = time.strftime('%Y-%m-%d %H:%M:%S')
+        db.session.commit()
 
 
     # Mover el archivo a la carpeta de procesados
