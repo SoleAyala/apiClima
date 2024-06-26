@@ -44,7 +44,7 @@ def climaRequestOnlyHour():
                     logger.info(f"Cargando para el Distrito con id {distrito.id} con dato {data}")
                     insert_history_hour_api(distrito.id, data)
 
-                    if verificar_registros_fecha(DiarioDia, fecha_hoy):
+                    if verificar_registros_fecha(DiarioDia, fecha_hoy, distrito.id):
                         logger.info(
                             f"Se realizará la carga de la tabla diario_dia y futuro_dia desde la consulta de horas, Hora:{time.strftime('%Y-%m-%d %H:%M:%S')}")
                         # Limpiar la tabla DiarioDia antes de insertar nuevos datos
