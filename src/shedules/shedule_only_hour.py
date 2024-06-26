@@ -43,6 +43,7 @@ def climaRequestOnlyHour():
                     data = response.json()
                     logger.info(f"Cargando para el Distrito con id {distrito.id} con dato {data}")
                     insert_history_hour_api(distrito.id, data)
+                    contador += 1
 
                     if verificar_registros_fecha(DiarioDia, fecha_hoy, distrito.id):
                         logger.info(
@@ -67,10 +68,10 @@ def climaRequestOnlyHour():
                     logger.info("Se duplico el registro anterior ")
                 else:
                     logger.info(f"No hay datos históricos para el distrito {distrito.id}")
-            contador += 1
+
             # Cada 50 llamadas, pausa durante 60 segundos
             if contador % 50 == 0:
                 logger.info(f'Pausa después de {contador} llamadas para evitar sobrepasar el límite de la API.')
                 time.sleep(60)  # Pausa de 1 minuto
 
-        logger.info("FINALIZANDO TAREA DE CARGA DE HORAS")
+        logger.info(f"FINALIZADO TAREA DE CARGA DE HORAS, Cantidad de llamadas igual a: {contador} ")
