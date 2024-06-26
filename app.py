@@ -151,8 +151,4 @@ if __name__ == '__main__':
     rebuild_dynamic_models()
     app.run(debug=True)
 
-
-
-    # serve(app, host='0.0.0.0', port=8080)  # http://localhost:8080/
-    # logger.info("Servidor Waitress iniciado")
-
+    # serve(app, host='0.0.0.0', port=8080, threads=6)  # http://localhost:8080/

@@ -98,7 +98,7 @@ def cargaTablaDiarioDia(day, distrito_id):
 def cargaTablaFuturoDia(data, distrito_id):
     from apiClima.app import db, FuturoDia, Distritos
 
-    # Verificar si fecha_carga_bulk está vacía
+    # Verificar si fecha_ini_apiclima está vacía
     distrito = Distritos.query.get(distrito_id)
     if distrito.fecha_ini_apiclima is None:
         distrito.fecha_ini_apiclima = time.strftime('%Y-%m-%d %H:%M:%S')
