@@ -61,8 +61,10 @@ def climaRequestOnlyHour():
             except (ConnectionError, ProtocolError, HTTPError, RequestException) as e:
                 logger.error(f'Error al hacer request a OpenWeather: {e}')
                 last_data = get_last_record_for_district(distrito.id)
+                logger.info(f"lastData encontrado: {last_data}")
                 if last_data:
                     insert_history_hour_api(distrito.id, last_data)
+                    logger.info("Se duplico el registro anterior ")
                 else:
                     logger.info(f"No hay datos históricos para el distrito {distrito.id}")
             contador += 1

@@ -11,7 +11,7 @@ from urllib3.exceptions import ProtocolError
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
 #@scheduler.task('cron', id='job_cron_midnight', hour='00', minute='1')
-@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/3')
+#@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/3')
 def climaRequestDayliAndFuture():
     from apiClima.app import Distritos, Configuraciones, app, db, DiarioDia, FuturoDia
     with app.app_context():
@@ -100,7 +100,7 @@ def get_last_record_for_district(id_distrito):
     last_record = HistoryModel.query.order_by(HistoryModel.update_datetime.desc()).first()
 
     if last_record:
-        logger.info("Encontrado el ultimo registro")
+        logger.info(f"Encontrado el ultimo registro{last_record}")
         # Si hay un registro, extrae los datos necesarios para replicar en un nuevo registro
         data = {
             "current": {
@@ -122,7 +122,7 @@ def get_last_record_for_district(id_distrito):
                 }]
             }
         }
-        return
+        return data
     logger.info("No existe el ultimo registro")
     return None
 
