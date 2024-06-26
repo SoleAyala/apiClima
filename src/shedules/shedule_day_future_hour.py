@@ -102,9 +102,12 @@ def get_last_record_for_district(id_distrito):
     if last_record:
         logger.info(f"Encontrado el ultimo registro{last_record}")
         # Si hay un registro, extrae los datos necesarios para replicar en un nuevo registro
+        date_string = time.strftime('%Y-%m-%d %H:%M:%S')
+        date_time_obj = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+        timestamp = date_time_obj.timestamp()
         data = {
             "current": {
-                "dt": last_record.update_datetime.timestamp(),  # Convierte datetime a timestamp
+                "dt": timestamp,  # Convierte datetime a timestamp
                 "sunrise": last_record.sunrise,
                 "sunset": last_record.sunset,
                 "temp": last_record.temp,
