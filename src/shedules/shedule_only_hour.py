@@ -1,6 +1,7 @@
 import time
 import requests
 import logging
+from sqlalchemy import func
 from apiClima.app import scheduler, app, db
 from requests.exceptions import ConnectionError, HTTPError, RequestException
 from urllib3.exceptions import ProtocolError
@@ -14,7 +15,8 @@ logger = logging.getLogger('ApiClima')
 
 @scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/4')
 def climaRequestOnlyHour():
-    from apiClima.app import Distritos, DiarioDia, FuturoDia, Configuraciones
+    from apiClima.app import Distritos, DiarioDia, FuturoDia, Configuraciones, CantidadLlamadas
+
     session = requests.Session()  # Usar una sesión para reutilizar conexiones
     with app.app_context():
         fecha_hoy = time.strftime('%Y-%m-%d')
@@ -75,3 +77,15 @@ def climaRequestOnlyHour():
                 time.sleep(60)  # Pausa de 1 minuto
 
         logger.info(f"FINALIZADO TAREA DE CARGA DE HORAS, Cantidad de llamadas igual a: {contador} ")
+
+        # Obtener la fecha actual
+        fecha_actual = time.strftime('%Y-%m-%d')
+
+
+        # Buscar los registros que tengan la misma fecha (solo considerando el año, mes y día)
+        registro_hoy = db.session.query(CantidadLlamadas).filter(
+            func.date(CantidadLlamadas.fecha) == fecha_actual).first()
+
+        registro_hoy.cantidad_llamadas += contador
+        db.session.commit()
+        print(f"El registro de cantidad de llamadas de la fecha {fecha_actual}, añadiendo una cantidad de {contador} llamadas en carga horaria")

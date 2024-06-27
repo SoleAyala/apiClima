@@ -47,6 +47,13 @@ class Configuraciones(db.Model):
     fecha_hora_actualizacion = db.Column(db.DateTime)
 
 
+class CantidadLlamadas(db.Model):
+    __tablename__ = 'cantidad_llamadas'
+    id = db.Column(db.Integer, primary_key=True)
+    cantidad_llamadas = db.Column(db.Integer)
+    fecha = db.Column(db.DateTime)
+
+
 class Distritos(db.Model):
     __tablename__ = 'distritos'
     id = db.Column(db.Integer, primary_key=True)
@@ -133,11 +140,6 @@ class FuturoDia(db.Model):
 
 
 from sqlalchemy import inspect
-
-
-
-
-
 
 
 @app.route('/')

@@ -2,6 +2,8 @@ from datetime import datetime
 import time
 import requests
 from sqlalchemy import and_
+
+from apiClima.app import scheduler
 from apiClima.src.api.Data_day import climaRequest
 from apiClima.src.api.history_hour_api import insert_history_hour_api, create_history_hour_table
 import logging
@@ -11,9 +13,9 @@ from urllib3.exceptions import ProtocolError
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
 #@scheduler.task('cron', id='job_cron_midnight', hour='00', minute='1')
-#@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/3')
+@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/3')
 def climaRequestDayliAndFuture():
-    from apiClima.app import Distritos, Configuraciones, app, db, DiarioDia, FuturoDia
+    from apiClima.app import Distritos, Configuraciones, app, db, DiarioDia, FuturoDia, CantidadLlamadas
     with app.app_context():
         logger.info('Ejecutando carga de pronóstico diario y futuro')
         global parameters
@@ -58,6 +60,7 @@ def climaRequestDayliAndFuture():
                 response = requests.get(url, params=parameters)
 
                 if response.status_code == 200:
+                    contador += 1
                     logger.info("OpenWeather ha retornado código 200")
                     data = response.json()
                     print(data)
@@ -77,12 +80,24 @@ def climaRequestDayliAndFuture():
                 else:
                     logger.info(f"No hay datos históricos para el distrito {distrito.id}")
 
-            contador += 1
+
             # Cada 50 llamadas, pausa durante 60 segundos
             if contador % 50 == 0:
                 logger.info(f'Pausa después de {contador} llamadas para evitar sobrepasar el límite de la API.')
-                time.sleep(60)  # Pausa de 1 minuto
-        logger.info("FINALIZANDO TAREA DE CARGA DE DIARIO Y FUTURO")
+                time.sleep(60)  # Pausa de 1 minuto###
+
+        logger.info(f"FINALIZANDO TAREA DE CARGA DE DIARIO Y FUTURO. Cantidad de llamadas realizadas {contador}")
+        nuevo_registro = CantidadLlamadas(
+            cantidad_llamadas=contador,
+            fecha=time.strftime('%Y-%m-%d')
+        )
+
+        # Añadir el nuevo registro a la sesión de la base de datos
+        db.session.add(nuevo_registro)
+
+        # Guardar los cambios en la base de datos
+        db.session.commit()
+        print(f"El registro de cantidad de llamadas de la fecha {nuevo_registro.fecha}, añadiendo una cantidad de {contador} llamadas en carga de diario y futuro")
 
 
 
