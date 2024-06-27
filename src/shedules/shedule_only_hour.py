@@ -14,7 +14,7 @@ from apiClima.src.shedules.shedule_day_future_hour import verificar_registros_fe
 logger = logging.getLogger('ApiClima')
 
 
-#@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/4')
+@scheduler.task('cron', id='job_cron_hourly_except_midnight', hour='1-23', minute=1)
 def climaRequestOnlyHour():
     from apiClima.app import Distritos, DiarioDia, FuturoDia, Configuraciones, CantidadLlamadas, FuturoDiaContingencia
 

@@ -14,8 +14,7 @@ from urllib3.exceptions import ProtocolError
 logger = logging.getLogger('ApiClima')
 
 
-#@scheduler.task('cron', id='job_cron_midnight', hour='00', minute='1')
-@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/1')
+@scheduler.task('cron', id='job_cron_midnight', hour='00', minute='1')
 def climaRequestDayliAndFuture():
     from apiClima.app import Distritos, Configuraciones, app, db, DiarioDia, FuturoDia, CantidadLlamadas, \
         FuturoDiaContingencia
