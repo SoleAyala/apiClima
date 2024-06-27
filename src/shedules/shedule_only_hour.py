@@ -51,29 +51,6 @@ def climaRequestOnlyHour():
                     if verificar_registros_fecha(DiarioDia, fecha_hoy, distrito.id) or verificar_registros_fecha(FuturoDia, fecha_hoy, distrito.id):
                         logger.info(
                             f"Se realizará la carga de la tabla diario_dia y futuro_dia desde la consulta de horas, Hora:{time.strftime('%Y-%m-%d %H:%M:%S')}")
-                        # Limpiar la tabla DiarioDia y futurodia antes de insertar nuevos datos
-                        try:
-                            num_rows_deleted = db.session.query(DiarioDia).delete()
-                            db.session.commit()
-                            logger.info(f"Tabla DiarioDia truncada, {num_rows_deleted} filas eliminadas.")
-
-                            num_rows_deleted = db.session.query(FuturoDiaContingencia).delete()
-                            db.session.commit()
-                            logger.info(f"Tabla FuturoDiaContingencia truncada, {num_rows_deleted} filas eliminadas.")
-
-                            logger.info("Iniciando buckup de tabla Futuro")
-                            move_data_to_contingency()
-                            logger.info("Tabla de FuturoContingencia cargada.")
-
-                            num_rows_deleted = db.session.query(FuturoDia).delete()
-                            db.session.commit()
-                            logger.info(f"Tabla FuturoDia truncada, {num_rows_deleted} filas eliminadas.")
-
-
-                        except Exception as e:
-                            db.session.rollback()
-                            logger.error(f"Error al truncar las tablas y hacer el backup: {e}")
-                            return  # Detener la ejecución si no se puede truncar la tabla
                         climaRequest(data, distrito.id)
 
             except (ConnectionError, ProtocolError, HTTPError, RequestException) as e:
