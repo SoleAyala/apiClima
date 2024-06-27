@@ -138,6 +138,40 @@ class FuturoDia(db.Model):
     snow = db.Column(db.String)
     uvi = db.Column(db.String)
 
+class FuturoDiaContingencia(db.Model):
+    __tablename__ = 'futuro_dia_contingencia'
+    id = db.Column(db.Integer, primary_key=True)
+    district_id = db.Column(db.Integer, db.ForeignKey('distritos.id'))
+    update_datetime = db.Column(db.DateTime)
+    date = db.Column(db.String)
+    sunrise = db.Column(db.String)
+    sunset = db.Column(db.String)
+    moonrise = db.Column(db.String)
+    moonset = db.Column(db.String)
+    moon_phase = db.Column(db.String)
+    temp_max = db.Column(db.String)
+    temp_min = db.Column(db.String)
+    temp_morn = db.Column(db.String)
+    temp_day = db.Column(db.String)
+    temp_eve = db.Column(db.String)
+    temp_night = db.Column(db.String)
+    feels_like_morn = db.Column(db.String)
+    feels_like_day = db.Column(db.String)
+    feels_like_eve = db.Column(db.String)
+    feels_like_night = db.Column(db.String)
+    pressure = db.Column(db.String)
+    humidity = db.Column(db.String)
+    dew_point = db.Column(db.String)
+    wind_speed = db.Column(db.String)
+    wind_gust = db.Column(db.String)
+    wind_deg = db.Column(db.String)
+    weather_description = db.Column(db.String)
+    clouds = db.Column(db.String)
+    pop = db.Column(db.String)
+    rain = db.Column(db.String)
+    snow = db.Column(db.String)
+    uvi = db.Column(db.String)
+
 
 from sqlalchemy import inspect
 

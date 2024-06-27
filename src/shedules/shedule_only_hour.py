@@ -7,15 +7,16 @@ from requests.exceptions import ConnectionError, HTTPError, RequestException
 from urllib3.exceptions import ProtocolError
 from apiClima.src.api.Data_day import climaRequest
 from apiClima.src.api.history_hour_api import insert_history_hour_api
-from apiClima.src.shedules.shedule_day_future_hour import verificar_registros_fecha, get_last_record_for_district
+from apiClima.src.shedules.shedule_day_future_hour import verificar_registros_fecha, get_last_record_for_district, \
+    move_data_to_contingency
 
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
 
 
-@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/4')
+#@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/4')
 def climaRequestOnlyHour():
-    from apiClima.app import Distritos, DiarioDia, FuturoDia, Configuraciones, CantidadLlamadas
+    from apiClima.app import Distritos, DiarioDia, FuturoDia, Configuraciones, CantidadLlamadas, FuturoDiaContingencia
 
     session = requests.Session()  # Usar una sesión para reutilizar conexiones
     with app.app_context():
@@ -43,21 +44,35 @@ def climaRequestOnlyHour():
                 if response.status_code == 200:
                     logger.info("OpenWeather ha retornado código 200")
                     data = response.json()
-                    logger.info(f"Cargando para el Distrito con id {distrito.id} con dato {data}")
+                    logger.info(f"Cargando para el Distrito con id {distrito.id}")
                     insert_history_hour_api(distrito.id, data)
                     contador += 1
 
-                    if verificar_registros_fecha(DiarioDia, fecha_hoy, distrito.id):
+                    if verificar_registros_fecha(DiarioDia, fecha_hoy, distrito.id) or verificar_registros_fecha(FuturoDia, fecha_hoy, distrito.id):
                         logger.info(
                             f"Se realizará la carga de la tabla diario_dia y futuro_dia desde la consulta de horas, Hora:{time.strftime('%Y-%m-%d %H:%M:%S')}")
-                        # Limpiar la tabla DiarioDia antes de insertar nuevos datos
+                        # Limpiar la tabla DiarioDia y futurodia antes de insertar nuevos datos
                         try:
                             num_rows_deleted = db.session.query(DiarioDia).delete()
                             db.session.commit()
                             logger.info(f"Tabla DiarioDia truncada, {num_rows_deleted} filas eliminadas.")
+
+                            num_rows_deleted = db.session.query(FuturoDiaContingencia).delete()
+                            db.session.commit()
+                            logger.info(f"Tabla FuturoDiaContingencia truncada, {num_rows_deleted} filas eliminadas.")
+
+                            logger.info("Iniciando buckup de tabla Futuro")
+                            move_data_to_contingency()
+                            logger.info("Tabla de FuturoContingencia cargada.")
+
+                            num_rows_deleted = db.session.query(FuturoDia).delete()
+                            db.session.commit()
+                            logger.info(f"Tabla FuturoDia truncada, {num_rows_deleted} filas eliminadas.")
+
+
                         except Exception as e:
                             db.session.rollback()
-                            logger.error(f"Error al truncar la tabla: {e}")
+                            logger.error(f"Error al truncar las tablas y hacer el backup: {e}")
                             return  # Detener la ejecución si no se puede truncar la tabla
                         climaRequest(data, distrito.id)
 

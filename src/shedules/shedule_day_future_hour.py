@@ -12,10 +12,13 @@ from urllib3.exceptions import ProtocolError
 
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
+
+
 #@scheduler.task('cron', id='job_cron_midnight', hour='00', minute='1')
-@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/3')
+@scheduler.task('cron', id='job_cron_hourly_except_midnight', minute='*/1')
 def climaRequestDayliAndFuture():
-    from apiClima.app import Distritos, Configuraciones, app, db, DiarioDia, FuturoDia, CantidadLlamadas
+    from apiClima.app import Distritos, Configuraciones, app, db, DiarioDia, FuturoDia, CantidadLlamadas, \
+        FuturoDiaContingencia
     with app.app_context():
         logger.info('Ejecutando carga de pronóstico diario y futuro')
         global parameters
@@ -24,7 +27,6 @@ def climaRequestDayliAndFuture():
 
         # Obtener todos los distritos activos
         distritos_activos = db.session.query(Distritos).filter_by(activo=True).all()
-        print(distritos_activos)
 
         # Limpiar la tabla DiarioDia antes de insertar nuevos datos
         try:
@@ -36,6 +38,20 @@ def climaRequestDayliAndFuture():
             logger.error(f"Error al truncar la tabla: {e}")
             return  # Detener la ejecución si no se puede truncar la tabla
 
+        # Limpiar la tabla FuturoDiaContingencia antes de insertar nuevos datos
+        try:
+            num_rows_deleted = db.session.query(FuturoDiaContingencia).delete()
+            db.session.commit()
+            logger.info(f"Tabla FuturoDiaContingencia truncada, {num_rows_deleted} filas eliminadas.")
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error al truncar la tabla: {e}")
+            return  # Detener la ejecución si no se puede truncar la tabla
+        #Poblar el backup de FuturoDia llamar a la función para mover los datos
+        logger.info("Iniciando buckup de tabla Futuro")
+        move_data_to_contingency()
+        logger.info("Tabla de FuturoContingencia cargada.")
+
         # Limpiar la tabla FuturoDia antes de insertar nuevos datos
         try:
             num_rows_deleted = db.session.query(FuturoDia).delete()
@@ -45,7 +61,6 @@ def climaRequestDayliAndFuture():
             db.session.rollback()
             logger.error(f"Error al truncar la tabla: {e}")
             return  # Detener la ejecución si no se puede truncar la tabla
-
 
         for distrito in distritos_activos:
             try:
@@ -63,7 +78,7 @@ def climaRequestDayliAndFuture():
                     contador += 1
                     logger.info("OpenWeather ha retornado código 200")
                     data = response.json()
-                    print(data)
+                    #print(data)
                     climaRequest(data, distrito.id)
                     logger.info('Tablas futuro_dia y diario_dia cargadas')
                     logger.info('Iniciando carga  las 00 para las horas')
@@ -79,7 +94,6 @@ def climaRequestDayliAndFuture():
                     insert_history_hour_api(distrito.id, last_data)
                 else:
                     logger.info(f"No hay datos históricos para el distrito {distrito.id}")
-
 
             # Cada 50 llamadas, pausa durante 60 segundos
             if contador % 50 == 0:
@@ -97,11 +111,61 @@ def climaRequestDayliAndFuture():
 
         # Guardar los cambios en la base de datos
         db.session.commit()
-        print(f"El registro de cantidad de llamadas de la fecha {nuevo_registro.fecha}, añadiendo una cantidad de {contador} llamadas en carga de diario y futuro")
+        print(
+            f"El registro de cantidad de llamadas de la fecha {nuevo_registro.fecha}, añadiendo una cantidad de {contador} llamadas en carga de diario y futuro")
 
 
+def move_data_to_contingency():
+    from apiClima.app import db, FuturoDia, FuturoDiaContingencia
+    # Obtener todos los registros de FuturoDia
+    all_futuro_dia = FuturoDia.query.all()
 
+    # Lista para almacenar los nuevos registros de FuturoDiaContingencia
+    new_records = []
 
+    for record in all_futuro_dia:
+        new_record = FuturoDiaContingencia(
+            district_id=record.district_id,
+            update_datetime=record.update_datetime,
+            date=record.date,
+            sunrise=record.sunrise,
+            sunset=record.sunset,
+            moonrise=record.moonrise,
+            moonset=record.moonset,
+            moon_phase=record.moon_phase,
+            temp_max=record.temp_max,
+            temp_min=record.temp_min,
+            temp_morn=record.temp_morn,
+            temp_day=record.temp_day,
+            temp_eve=record.temp_eve,
+            temp_night=record.temp_night,
+            feels_like_morn=record.feels_like_morn,
+            feels_like_day=record.feels_like_day,
+            feels_like_eve=record.feels_like_eve,
+            feels_like_night=record.feels_like_night,
+            pressure=record.pressure,
+            humidity=record.humidity,
+            dew_point=record.dew_point,
+            wind_speed=record.wind_speed,
+            wind_gust=record.wind_gust,
+            wind_deg=record.wind_deg,
+            weather_description=record.weather_description,
+            clouds=record.clouds,
+            pop=record.pop,
+            rain=record.rain,
+            snow=record.snow,
+            uvi=record.uvi
+        )
+        new_records.append(new_record)
+
+    # Agregar los nuevos registros a la sesión
+    db.session.bulk_save_objects(new_records)
+
+    # Confirmar la transacción
+    db.session.commit()
+
+    # Confirmar la eliminación
+    db.session.commit()
 
 
 def get_last_record_for_district(id_distrito):
