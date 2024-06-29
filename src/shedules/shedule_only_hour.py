@@ -42,7 +42,7 @@ def climaRequestOnlyHour():
                 response.raise_for_status()  # Verificar si la respuesta es un error
 
                 if response.status_code == 200:
-                    logger.info("OpenWeather ha retornado código 200")
+                    logger.info("OpenWeather ha retornado código 200 - " + distrito.appid)
                     data = response.json()
                     logger.info(f"Cargando para el Distrito con id {distrito.id}")
                     insert_history_hour_api(distrito.id, data)
