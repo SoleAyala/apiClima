@@ -78,6 +78,16 @@ def climaRequestOnlyHour():
         registro_hoy = db.session.query(CantidadLlamadas).filter(
             func.date(CantidadLlamadas.fecha) == fecha_actual).first()
 
-        registro_hoy.cantidad_llamadas += contador
+        if registro_hoy is None:
+            nuevo_registro = CantidadLlamadas(
+                cantidad_llamadas=contador,
+                fecha=time.strftime('%Y-%m-%d')
+            )
+
+            # Añadir el nuevo registro a la sesión de la base de datos
+            db.session.add(nuevo_registro)
+        else:
+            registro_hoy.cantidad_llamadas += contador
+
         db.session.commit()
-        print(f"El registro de cantidad de llamadas de la fecha {fecha_actual}, añadiendo una cantidad de {contador} llamadas en carga horaria")
+        logger.info(f"El registro de cantidad de llamadas de la fecha {fecha_actual}, añadiendo una cantidad de {contador} llamadas en carga horaria")
