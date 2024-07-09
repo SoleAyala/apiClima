@@ -52,6 +52,10 @@ def climaRequestOnlyHour():
                         logger.info(
                             f"Se realizará la carga de la tabla diario_dia y futuro_dia desde la consulta de horas, Hora:{time.strftime('%Y-%m-%d %H:%M:%S')}")
                         climaRequest(data, distrito.id)
+                        # Cada 50 llamadas, pausa durante 60 segundos
+                    if contador % 50 == 0:
+                        logger.info(f'Pausa después de {contador} llamadas para evitar sobrepasar el límite de la API.')
+                        time.sleep(60)  # Pausa de 1 minuto
 
             except (ConnectionError, ProtocolError, HTTPError, RequestException) as e:
                 logger.error(f'Error al hacer request a OpenWeather: {e}')
@@ -63,10 +67,7 @@ def climaRequestOnlyHour():
                 else:
                     logger.info(f"No hay datos históricos para el distrito {distrito.id}")
 
-            # Cada 50 llamadas, pausa durante 60 segundos
-                if contador % 50 == 0 and response.status_code == 200:
-                    logger.info(f'Pausa después de {contador} llamadas para evitar sobrepasar el límite de la API.')
-                    time.sleep(60)  # Pausa de 1 minuto
+
 
         logger.info(f"FINALIZADO TAREA DE CARGA DE HORAS, Cantidad de llamadas igual a: {contador} ")
 
