@@ -108,7 +108,7 @@ def cargaTablaFuturoDia(data, distrito_id):
     contador = 0
     for day in data[1:]:
         contador = contador + 1
-        print(f"Cargando dato {contador}")
+        # print(f"Cargando dato {contador}")
         fecha = day.get('dt')
         salida_sol = day.get('sunrise')
         puesta_sol = day.get('sunset')
@@ -176,4 +176,5 @@ def cargaTablaFuturoDia(data, distrito_id):
         db.session.add(nuevo_registro)
         db.session.commit()
 
-        logger.info(f"Carga Tabla futuro_dia en el contador {contador} realizada")
+        # logger.info(f"Carga Tabla futuro_dia en el contador {contador} realizada")
+    logger.info(f"Carga Tabla futuro_dia realizada")

@@ -47,9 +47,9 @@ def climaRequestDayliAndFuture():
             logger.error(f"Error al truncar la tabla: {e}")
             return  # Detener la ejecución si no se puede truncar la tabla
         #Poblar el backup de FuturoDia llamar a la función para mover los datos
-        logger.info("Iniciando buckup de tabla Futuro")
+        logger.info("Iniciando backup de tabla Futuro")
         move_data_to_contingency()
-        logger.info("Tabla de FuturoContingencia cargada.")
+        logger.info("Tabla de FuturoDiaContingencia cargada.")
 
         # Limpiar la tabla FuturoDia antes de insertar nuevos datos
         try:
@@ -75,7 +75,7 @@ def climaRequestDayliAndFuture():
 
                 if response.status_code == 200:
                     contador += 1
-                    logger.info("OpenWeather ha retornado código 200")
+                    logger.info("OpenWeather ha retornado código 200 - " + distrito.appid)
                     data = response.json()
                     #print(data)
                     climaRequest(data, distrito.id)
@@ -110,8 +110,8 @@ def climaRequestDayliAndFuture():
 
         # Guardar los cambios en la base de datos
         db.session.commit()
-        print(
-            f"El registro de cantidad de llamadas de la fecha {nuevo_registro.fecha}, añadiendo una cantidad de {contador} llamadas en carga de diario y futuro")
+        logger.info(
+            f"El registro de cantidad de llamadas de la fecha {nuevo_registro.fecha} ha aumentado, en una cantidad de {contador} llamadas en carga de diario y futuro")
 
 
 def move_data_to_contingency():

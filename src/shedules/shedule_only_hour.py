@@ -23,12 +23,10 @@ def climaRequestOnlyHour():
         fecha_hoy = time.strftime('%Y-%m-%d')
         url = "https://api.openweathermap.org/data/3.0/onecall"
         contador = 0
-        bandera = 0
         # Obtener todos los distritos activos
         distritos_activos = db.session.query(Distritos).filter_by(activo=True).all()
 
         for distrito in distritos_activos:
-
             try:
                 appid = db.session.query(Configuraciones).filter_by(parametro=distrito.appid).first().valor
                 parameters = {
@@ -41,7 +39,7 @@ def climaRequestOnlyHour():
 
                 response = session.get(url, params=parameters)
                 response.raise_for_status()  # Verificar si la respuesta es un error
-                bandera += 1
+
 
                 if response.status_code == 200:
                     logger.info("OpenWeather ha retornado código 200")
@@ -50,8 +48,7 @@ def climaRequestOnlyHour():
                     insert_history_hour_api(distrito.id, data)
                     contador += 1
 
-                    if verificar_registros_fecha(DiarioDia, fecha_hoy, distrito.id) or verificar_registros_fecha(
-                            FuturoDia, fecha_hoy, distrito.id):
+                    if verificar_registros_fecha(DiarioDia, fecha_hoy, distrito.id) or verificar_registros_fecha(FuturoDia, fecha_hoy, distrito.id):
                         logger.info(
                             f"Se realizará la carga de la tabla diario_dia y futuro_dia desde la consulta de horas, Hora:{time.strftime('%Y-%m-%d %H:%M:%S')}")
                         climaRequest(data, distrito.id)
@@ -76,11 +73,21 @@ def climaRequestOnlyHour():
         # Obtener la fecha actual
         fecha_actual = time.strftime('%Y-%m-%d')
 
+
         # Buscar los registros que tengan la misma fecha (solo considerando el año, mes y día)
         registro_hoy = db.session.query(CantidadLlamadas).filter(
             func.date(CantidadLlamadas.fecha) == fecha_actual).first()
 
-        registro_hoy.cantidad_llamadas += contador
+        if registro_hoy is None:
+            nuevo_registro = CantidadLlamadas(
+                cantidad_llamadas=contador,
+                fecha=time.strftime('%Y-%m-%d')
+            )
+
+            # Añadir el nuevo registro a la sesión de la base de datos
+            db.session.add(nuevo_registro)
+        else:
+            registro_hoy.cantidad_llamadas += contador
+
         db.session.commit()
-        print(
-            f"El registro de cantidad de llamadas de la fecha {fecha_actual}, añadiendo una cantidad de {contador} llamadas en carga horaria")
+        logger.info(f"El registro de cantidad de llamadas de la fecha {fecha_actual}, añadiendo una cantidad de {contador} llamadas en carga horaria")
