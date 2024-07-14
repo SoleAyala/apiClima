@@ -4,7 +4,7 @@ import glob
 from apiClima.app import scheduler, db
 
 
-@scheduler.task('cron', id='job_cron', hour='02', minute='30')
+@scheduler.task('cron', id='job_cron', hour='02', minute='30', misfire_grace_time=3000)
 def carga_historico_hora_bulk():
     from apiClima.app import app, Configuraciones
     logger.info("Iniciando carga de archivos csv desde el directorio")
