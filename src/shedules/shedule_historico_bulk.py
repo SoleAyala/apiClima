@@ -1,12 +1,19 @@
 import os
-from apiClima.src.api.history_hour_bulk import load_csv_to_db, logger
+import logging
+from src.api.history_hour_bulk import load_csv_to_db
 import glob
-from apiClima.app import scheduler, db
+from app import scheduler, db
 
+# Obtener la instancia del logger configurado
+logger = logging.getLogger('ApiClima')
+
+logger.info('Importando shedule_day_future_hour.py *************')
 
 @scheduler.task('cron', id='job_cron', hour='02', minute='30', misfire_grace_time=3000)
 def carga_historico_hora_bulk():
-    from apiClima.app import app, Configuraciones
+    logger.info('Tarea programada "schedule_historico_bulk" iniciada.')
+
+    from app import app, Configuraciones
     logger.info("Iniciando carga de archivos csv desde el directorio")
     with app.app_context():
         configuracion = db.session.query(Configuraciones).filter_by(parametro='path_bulk_procesar').first()

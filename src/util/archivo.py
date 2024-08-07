@@ -3,7 +3,7 @@
 
 def rebuild_dynamic_models():
     from sqlalchemy import inspect
-    from apiClima.app import db, dynamic_models, app
+    from app import db, dynamic_models, app
     with app.app_context():
         """Actualiza el registro de tablas existentes en la base de datos."""
         engine = db.engine

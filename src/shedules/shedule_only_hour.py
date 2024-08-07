@@ -2,21 +2,24 @@ import time
 import requests
 import logging
 from sqlalchemy import func
-from apiClima.app import scheduler, app, db
+from app import scheduler, app, db
 from requests.exceptions import ConnectionError, HTTPError, RequestException
 from urllib3.exceptions import ProtocolError
-from apiClima.src.api.Data_day import climaRequest
-from apiClima.src.api.history_hour_api import insert_history_hour_api
-from apiClima.src.shedules.shedule_day_future_hour import verificar_registros_fecha, get_last_record_for_district, \
+from src.api.Data_day import climaRequest
+from src.api.history_hour_api import insert_history_hour_api
+from src.shedules.shedule_day_future_hour import verificar_registros_fecha, get_last_record_for_district, \
     move_data_to_contingency
 
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
 
+logger.info('Importando shedule_day_future_hour.py *************')
 
 @scheduler.task('cron', id='job_cron_hourly_except_midnight', hour='1-23', minute=1, misfire_grace_time=3000)
 def climaRequestOnlyHour():
-    from apiClima.app import Distritos, DiarioDia, FuturoDia, Configuraciones, CantidadLlamadas, FuturoDiaContingencia
+    logger.info('Tarea programada "schedule_only_hour" iniciada.')
+
+    from app import Distritos, DiarioDia, FuturoDia, Configuraciones, CantidadLlamadas, FuturoDiaContingencia
 
     session = requests.Session()  # Usar una sesión para reutilizar conexiones
     with app.app_context():

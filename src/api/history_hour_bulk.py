@@ -9,7 +9,7 @@ logger = logging.getLogger('ApiClima')
 
 
 def load_csv_to_db(file_path):
-    from apiClima.app import db, Configuraciones, Distritos
+    from app import db, Configuraciones, Distritos
 
     # Leer el archivo CSV
     data = pd.read_csv(file_path)

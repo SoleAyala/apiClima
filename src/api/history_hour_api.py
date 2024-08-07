@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 
 from sqlalchemy import Column, Integer, Float, String, DateTime
-from apiClima.app import db
+from app import db
 
 dynamic_models = {}
 
@@ -59,7 +59,7 @@ def create_model_for_table(table_name, class_name):
     return type(class_name, (db.Model,), attrs)
 
 def insert_history_hour_api(id_distrito, data):
-    from apiClima.app import Distritos
+    from app import Distritos
     current = data["current"]
     Table = create_history_hour_table(id_distrito)
 

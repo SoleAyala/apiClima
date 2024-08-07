@@ -1,56 +1,35 @@
-# ================================== BUILDER ===================================
-ARG INSTALL_PYTHON_VERSION=${INSTALL_PYTHON_VERSION:-PYTHON_VERSION_NOT_SET}
-ARG INSTALL_NODE_VERSION=${INSTALL_NODE_VERSION:-NODE_VERSION_NOT_SET}
 
-FROM node:${INSTALL_NODE_VERSION}-bullseye-slim AS node
-FROM python:${INSTALL_PYTHON_VERSION}-slim-bullseye AS builder
+FROM python:3.9-slim
 
+# Establece el directorio de trabajo en el contenedor
 WORKDIR /app
 
-COPY --from=node /usr/local/bin/ /usr/local/bin/
-COPY --from=node /usr/lib/ /usr/lib/
-# See https://github.com/moby/moby/issues/37965
-RUN true
-COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY apiClima/requirements requirements
-RUN pip install --no-cache -r requirements/prod.txt
+# Configurar la zona horaria
+ENV TZ=America/Asuncion
+RUN apt-get update && apt-get install -y tzdata && \
+    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata
 
-COPY apiClima/package.json ./
-RUN npm install
+# Copia el archivo de requisitos y los instala
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY apiClima/webpack.config.js autoapp.py ./
-COPY apiClima apiClima
-COPY apiClima/assets assets
-COPY .env.example .env
-RUN npm run-script build
+# Copia el contenido del proyecto en el directorio de trabajo del contenedor
+COPY . .
 
-# ================================= PRODUCTION =================================
-FROM python:${INSTALL_PYTHON_VERSION}-slim-buster as production
-
-WORKDIR /app
-
-RUN useradd -m sid
-RUN chown -R sid:sid /app
-USER sid
-ENV PATH="/home/sid/.local/bin:${PATH}"
-
-COPY --from=builder --chown=sid:sid /app/apiClima/static /app/apiClima/static
-COPY apiClima/requirements requirements
-RUN pip install --no-cache --user -r requirements/prod.txt
-
-COPY apiClima/supervisord.conf /etc/supervisor/supervisord.conf
-COPY supervisord_programs /etc/supervisor/conf.d
-
-COPY apiClima .
-
-EXPOSE 5000
-ENTRYPOINT ["/bin/bash", "shell_scripts/supervisord_entrypoint.sh"]
-CMD ["-c", "/etc/supervisor/supervisord.conf"]
+# Define la instrucción para ejecutar la aplicación
+# Numero de workers?
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
 
 
-# ================================= DEVELOPMENT ================================
-FROM builder AS development
-RUN pip install --no-cache -r requirements/dev.txt
-EXPOSE 2992
-EXPOSE 5000
-CMD [ "npm", "start" ]
+# Crear imagen
+#docker build -t apiclima .
+
+# Ejecutar imagen
+#docker run -d -p 8080:8080 apiclima
+
+# VER = archivo de HistoricoBulk, directorio de Logs
+
+#docker ps
+#docker logs CONTAINER ID
+#docker exec CONTAINER ID date

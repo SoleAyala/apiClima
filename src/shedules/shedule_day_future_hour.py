@@ -3,9 +3,9 @@ import time
 import requests
 from sqlalchemy import and_
 
-from apiClima.app import scheduler
-from apiClima.src.api.Data_day import climaRequest
-from apiClima.src.api.history_hour_api import insert_history_hour_api, create_history_hour_table
+from app import scheduler
+from src.api.Data_day import climaRequest
+from src.api.history_hour_api import insert_history_hour_api, create_history_hour_table
 import logging
 from requests.exceptions import ConnectionError, HTTPError, RequestException
 from urllib3.exceptions import ProtocolError
@@ -13,10 +13,14 @@ from urllib3.exceptions import ProtocolError
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
 
+logger.info('Importando shedule_day_future_hour.py *************')
+
 
 @scheduler.task('cron', id='job_cron_midnight', hour='00', minute='1', misfire_grace_time=3000)
 def climaRequestDayliAndFuture():
-    from apiClima.app import Distritos, Configuraciones, app, db, DiarioDia, FuturoDia, CantidadLlamadas, \
+    logger.info('Tarea programada "schedule_day_future_hour" iniciada.')
+
+    from app import Distritos, Configuraciones, app, db, DiarioDia, FuturoDia, CantidadLlamadas, \
         FuturoDiaContingencia
     with app.app_context():
         logger.info('Ejecutando carga de pronóstico diario y futuro')
@@ -115,7 +119,7 @@ def climaRequestDayliAndFuture():
 
 
 def move_data_to_contingency():
-    from apiClima.app import db, FuturoDia, FuturoDiaContingencia
+    from app import db, FuturoDia, FuturoDiaContingencia
     # Obtener todos los registros de FuturoDia
     all_futuro_dia = FuturoDia.query.all()
 

@@ -1,8 +1,61 @@
-# Included because many Paas's require a requirements.txt file in the project root
-# Just installs the production requirements.
--r requirements/dev.txt
-# Everything the developer needs in addition to the production requirements
-#-r prod.txt
+# Flask Core and utilities
+click>=7.0                       # Library for creating command line interfaces
+Flask==3.0.3                     # Core Flask package
+Werkzeug==3.0.3                  # WSGI utility library for Python
 
+# Database
+Flask-SQLAlchemy==3.1.1          # Flask extension for SQLAlchemy
+psycopg2-binary==2.9.9           # PostgreSQL adapter for Python
+SQLAlchemy==2.0.30               # SQL toolkit and ORM
 
+# Forms and Validation
+email-validator==2.1.1           # Validator for email addresses
+Flask-WTF==1.2.1                 # Flask integration with WTForms
+WTForms==3.1.2                   # Form handling library
 
+# Authentication
+Flask-Bcrypt==1.0.1              # Flask extension for bcrypt hashing
+Flask-Login==0.6.3               # User session management for Flask
+
+# Caching
+Flask-Caching>=2.0.2             # Adds caching support to your Flask application
+
+# Debugging Tools
+Flask-DebugToolbar==0.15.1       # Provides a debug toolbar useful for Flask applications
+
+# Deployment
+gevent==24.2.1                   # Coroutine-based network library
+supervisor==4.2.5                # Process control system
+gunicorn==20.1.0                 # WSGI HTTP Server for UNIX
+python-dotenv==0.21.1            # Reads key-value pairs from a .env file and sets them as environment variables
+waitress==3.0.0                  # Production-grade WSGI server with very acceptable performance
+
+# Flask Extensions
+Flask-Migrate==4.0.7             # Database migration framework for Flask applications using SQLAlchemy
+Flask-Static-Digest==0.4.1       # Compress and hash Flask static files
+Flask-APScheduler==1.13.1        # Adds APScheduler support to Flask
+
+# Environment Variables
+environs==11.0.0                 # Simplified environment variable parsing
+
+# Data Handling
+pandas==2.2.2                    # Data analysis library
+pytz~=2024.1                     # Timezone definitions
+requests==2.32.2                 # HTTP library
+
+# Development Environment
+virtualenv==20.25.2              # Tool for creating isolated Python environments
+greenlet==3.0.3                  # Lightweight in-process concurrent programming
+
+# Linting and Code Style
+black==24.4.2                    # The uncompromising code formatter
+flake8==7.0.0                    # Tool for style guide enforcement
+flake8-blind-except==0.2.1       # Flake8 plugin to check for blind except: statements
+flake8-debugger==4.1.2           # Flake8 plugin to find debugger statements in code
+flake8-docstrings==1.7.0         # Flake8 plugin for checking docstrings
+flake8-isort==6.1.1              # Flake8 plugin for isort
+isort==5.13.2                    # Python utility / library to sort imports
+pep8-naming==0.14.1              # Flake8 plugin for checking PEP8 naming conventions
+
+celery==5.2.3
+redis==4.1.0
