@@ -13,8 +13,6 @@ from src.shedules.shedule_day_future_hour import verificar_registros_fecha, get_
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
 
-logger.info('Importando shedule_day_future_hour.py *************')
-
 @scheduler.task('cron', id='job_cron_hourly_except_midnight', hour='1-23', minute=1, misfire_grace_time=3000)
 def climaRequestOnlyHour():
     logger.info('Tarea programada "schedule_only_hour" iniciada.')

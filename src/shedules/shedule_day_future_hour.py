@@ -13,9 +13,6 @@ from urllib3.exceptions import ProtocolError
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
 
-logger.info('Importando shedule_day_future_hour.py *************')
-
-
 @scheduler.task('cron', id='job_cron_midnight', hour='00', minute='1', misfire_grace_time=3000)
 def climaRequestDayliAndFuture():
     logger.info('Tarea programada "schedule_day_future_hour" iniciada.')

@@ -7,8 +7,6 @@ from app import scheduler, db
 # Obtener la instancia del logger configurado
 logger = logging.getLogger('ApiClima')
 
-logger.info('Importando shedule_day_future_hour.py *************')
-
 @scheduler.task('cron', id='job_cron', hour='02', minute='30', misfire_grace_time=3000)
 def carga_historico_hora_bulk():
     logger.info('Tarea programada "schedule_historico_bulk" iniciada.')
